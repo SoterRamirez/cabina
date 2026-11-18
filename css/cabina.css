@@ -171,3 +171,4 @@ h1[class*="senal-borde-"] { padding-left: 12px; border-left: 6px solid; border-r
 .lista-colores { list-style: none; padding: 0; margin: 0; }
 .lista-colores li { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
 .muestra { width: 28px; height: 20px; border-radius: 4px; flex: none; }
+.info { border-left: 4px solid var(--senal); padding: 8px 12px; background: var(--superficie); border-radius: 0; margin: 12px 0; }

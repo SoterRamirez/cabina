@@ -61,6 +61,16 @@ function vistaSedes(cont) {
 }
 
 // ───────── ¿Es real el mensaje de la SICT? ─────────
+// Dominios conocidos que no son de gobierno: se avisan en azul, sin hacerlos pasar por oficiales.
+// Solo cuenta el dominio exacto o lo que termina en «.dominio» (blog.soterramirez.dev sí; soterramirez.dev.pagos.com no).
+const CONOCIDOS = [
+  ["soterramirez.dev", "el sitio de Soter Ramírez (autor de Cabina)"],
+  ["vendotractos.com", "el sitio de Vendotractos, distribuidor de camiones FAW"],
+  ["alfatraslados.com", "el sitio de Alfa Traslados, traslado de unidades"],
+  ["autotransportescrees.com", "el sitio de Autotransporte CRES"]
+];
+const conocido = (h) => CONOCIDOS.find(([d]) => h === d || h.endsWith("." + d));
+const esGobierno = (h) => h === "gob.mx" || h.endsWith(".gob.mx");
 const PALABRAS_FRAUDE = ["suspension de placas", "suspensión de placas", "multa pendiente", "pague hoy", "último aviso", "ultimo aviso", "bloqueo", "cancelacion de licencia", "cancelación de licencia"];
 function vistaSict(cont) {
   const texto = campo("Pega aquí el mensaje o el enlace que te llegó", { tag: "textarea", placeholder: "Pega el mensaje de WhatsApp o SMS" });
@@ -71,12 +81,15 @@ function vistaSict(cont) {
     if (!t) return texto.marcar("Pega el mensaje para revisarlo.");
     const urls = t.match(/(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(\/[^\s]*)?/gi) || [];
     const hosts = urls.map((u) => { try { return new URL(/^https?:/i.test(u) ? u : "https://" + u).hostname.toLowerCase(); } catch { return u.toLowerCase(); } });
-    const malos = hosts.filter((h) => !(h === "gob.mx" || h.endsWith(".gob.mx")));
+    const unicos = [...new Set(hosts)];
+    const gob = unicos.filter(esGobierno), conocidos = unicos.filter((h) => !esGobierno(h) && conocido(h));
+    const malos = unicos.filter((h) => !esGobierno(h) && !conocido(h));
     const presion = PALABRAS_FRAUDE.filter((p) => t.toLowerCase().includes(p));
     const out = [];
-    if (malos.length) out.push(el("p", { class: "alerta" }, "Ojo: este enlace NO es de gobierno: " + [...new Set(malos)].join(", ") + ". No lo abras ni pagues nada ahí."));
-    else if (hosts.length) out.push(el("p", { class: "ok" }, "Los enlaces terminan en .gob.mx: " + [...new Set(hosts)].join(", ") + ". Aun así, entra escribiendo tú la dirección."));
-    else out.push(el("p", null, "No encontré enlaces en el mensaje."));
+    if (malos.length) out.push(el("p", { class: "alerta" }, "Ojo: este enlace NO es de gobierno: " + malos.join(", ") + ". No lo abras ni pagues nada ahí."));
+    conocidos.forEach((h) => out.push(el("p", { class: "info" }, h + " es " + conocido(h)[1] + ", no de gobierno. Ahí no se hacen trámites de la SICT ni se pagan multas o placas.")));
+    if (gob.length) out.push(el("p", { class: "ok" }, "Los enlaces terminan en .gob.mx: " + gob.join(", ") + ". Aun así, entra escribiendo tú la dirección."));
+    if (!unicos.length) out.push(el("p", null, "No encontré enlaces en el mensaje."));
     if (presion.length) out.push(el("p", { class: "aviso" }, "Usa frases de presión típicas de fraude: «" + presion.join("», «") + "»."));
     out.push(el("p", { class: "suave" }, "Para el Mes del Apto Médico el único registro válido es micrs.sct.gob.mx. La SICT no te va a pedir pagos por WhatsApp."));
     res.replaceChildren(...out);
