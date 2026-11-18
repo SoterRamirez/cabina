@@ -1,8 +1,8 @@
 // Trámites, avisos y emergencias. Fuentes: DOF y sitios gob.mx (revisados el 16 y el 18/11/2026).
 import { el, leer, guardar, campo, fuente, encabezado, fechaCorta, diaDesdeISO, copiar } from "./ui.js";
 
-const APTO = ["Acuerdo del Mes del Apto Médico, DOF 13/11/2026", "https://www.dof.gob.mx/nota_detalle.php?codigo=5803765&fecha=13/11/2026"];
-const IAVE = ["Lineamientos IAVE, DOF 29/07/2026", "https://www.dof.gob.mx/nota_detalle.php?codigo=5794972&fecha=29/07/2026"];
+const APTO = ["Acuerdo del Mes del Apto Médico, DOF 13/11/2026", "https://dof.gob.mx/nota_detalle.php?codigo=5803765&fecha=13/11/2026"];
+const IAVE = ["Lineamientos IAVE, DOF 29/07/2026", "https://dof.gob.mx/nota_detalle.php?codigo=5794972&fecha=29/07/2026"];
 
 // ───────── Mi constancia y mi licencia ─────────
 function diasPara(iso) { const h = new Date(); h.setHours(0, 0, 0, 0); return Math.round((diaDesdeISO(iso) - h) / 864e5); }

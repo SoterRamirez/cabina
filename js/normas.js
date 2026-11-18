@@ -1,11 +1,11 @@
 // Herramientas de normas. Datos verificados en el DOF al 16/11/2026 (SoterRamirez/verificacion-normas).
 import { el, leer, guardar, campo, fuente, encabezado, horaCorta, avisar } from "./ui.js";
 
-const NOM087 = ["NOM-087-SCT-2-2017, DOF 28/06/2018", "https://www.dof.gob.mx/nota_detalle.php?codigo=5529381&fecha=28/06/2018"];
-const NOM068 = ["NOM-068-SCT-2-2014, DOF 19/01/2015", "https://www.dof.gob.mx/nota_detalle.php?codigo=5378850&fecha=19/01/2015"];
-const NOM045 = ["NOM-045-SEMARNAT-2017, DOF 08/03/2018", "https://www.dof.gob.mx/nota_detalle.php?codigo=5515481&fecha=08/03/2018"];
-const AVISO_VERIF = ["Aviso SICT, DOF 03/04/2026", "https://www.dof.gob.mx/nota_detalle.php?codigo=5784029&fecha=03/04/2026"];
-const REGLAMENTO = ["Reglamento de Tránsito en Carreteras Federales (reforma DOF 13/08/2026)", "https://www.dof.gob.mx/nota_detalle.php?codigo=5796297&fecha=13/08/2026"];
+const NOM087 = ["NOM-087-SCT-2-2017, DOF 28/06/2018", "https://dof.gob.mx/nota_detalle.php?codigo=5529381&fecha=28/06/2018"];
+const NOM068 = ["NOM-068-SCT-2-2014, DOF 19/01/2015", "https://dof.gob.mx/nota_detalle.php?codigo=5378850&fecha=19/01/2015"];
+const NOM045 = ["NOM-045-SEMARNAT-2017, DOF 08/03/2018", "https://dof.gob.mx/nota_detalle.php?codigo=5515481&fecha=08/03/2018"];
+const AVISO_VERIF = ["Aviso SICT, DOF 03/04/2026", "https://dof.gob.mx/nota_detalle.php?codigo=5784029&fecha=03/04/2026"];
+const REGLAMENTO = ["Reglamento de Tránsito en Carreteras Federales (reforma DOF 13/08/2026)", "https://dof.gob.mx/nota_detalle.php?codigo=5796297&fecha=13/08/2026"];
 
 const H = 3600e3, M = 60e3;
 

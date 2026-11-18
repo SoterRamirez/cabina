@@ -110,6 +110,9 @@ function pestanaCamino() {
 function pestanaGrupo(grupo, titulo, sub) {
   vista.append(el("h1", null, titulo), el("p", { class: "suave" }, sub),
     el("div", { class: "letreros" }, ...HERRAMIENTAS.filter((h) => h.grupo === grupo).map(letrero)));
+  // La guía completa vive en el sitio (necesita señal la primera vez).
+  if (grupo === "Trámites") vista.append(el("h2", { class: "grupo" }, "Para leer con calma"),
+    el("div", { class: "letreros" }, el("a", { class: "letrero senal-azul", href: "../normas/" }, icono("libreta", 26), el("span", null, "Guía: normas que debes conocer"), icono("flecha", 20, "flecha"))));
 }
 
 // ───────── Mis datos y respaldo ─────────
