@@ -1,60 +1,124 @@
 // Cabina · la navaja suiza del operador. Sin cuentas, sin servidor: todo vive en tu celular.
 import { el, leer, guardar, todasLasClaves, borrarTodo, encabezado, avisar, compartirArchivo, hoyISO, diaDesdeISO, fechaCorta, horaCorta } from "./ui.js";
-import { HERRAMIENTAS_NORMAS, vigilarTurno } from "./normas.js";
+import { HERRAMIENTAS_NORMAS, vigilarTurno, turnoActual, arrancarTurno, alternarPausa, manejado, siguientePausa, enPausa, duracion } from "./normas.js";
 import { HERRAMIENTAS_TRAMITES } from "./tramites.js";
 import { HERRAMIENTAS_CUENTAS } from "./cuentas.js";
+import { icono } from "./iconos.js";
+import { vistaAyuda, vistaAviso, tarjetaBienvenida } from "./ayuda.js";
 
-const HERRAMIENTAS = [...HERRAMIENTAS_TRAMITES.filter((h) => h.grupo === "En el camino"), ...HERRAMIENTAS_NORMAS, ...HERRAMIENTAS_TRAMITES.filter((h) => h.grupo !== "En el camino"), ...HERRAMIENTAS_CUENTAS];
-const GRUPOS = ["En el camino", "Normas y trámites", "Cuentas y bitácora"];
+const HERRAMIENTAS = [...HERRAMIENTAS_TRAMITES, ...HERRAMIENTAS_NORMAS, ...HERRAMIENTAS_CUENTAS];
+// Pestañas de la barra inferior. El color es el del señalamiento: verde camino, azul informativo, amarillo cuentas.
+const PESTANAS = [
+  { ruta: "", grupo: "Camino", titulo: "Camino", icono: "volante", senal: "verde" },
+  { ruta: "tramites", grupo: "Trámites", titulo: "Trámites", icono: "documento", senal: "azul" },
+  { ruta: "cuentas", grupo: "Cuentas", titulo: "Cuentas", icono: "calculadora", senal: "amarillo" },
+  { ruta: "mis-datos", grupo: null, titulo: "Mis datos", icono: "persona", senal: "gris" }
+];
+const SENAL = { Camino: "verde", "Trámites": "azul", Cuentas: "amarillo" };
 const vista = document.getElementById("vista");
+const barra = document.getElementById("barra-inferior");
 let limpiar = null;
 let instalador = null;
 
-// ───────── Inicio ─────────
-function tarjetaTurno() {
-  const t = leer("turno", null);
-  if (!t || t.terminado) return null;
-  return el("a", { class: "tablero", href: "#/horas", style: "display:block;text-decoration:none" },
-    el("p", { class: "chico" }, "Turno en curso desde " + horaCorta(new Date(t.inicio))),
-    el("p", { class: "grande" }, "Ver mis horas →"));
+// ───────── Piezas del tablero ─────────
+function medidor(fraccion, texto) {
+  const r = 30, c = 2 * Math.PI * r, f = Math.max(0, Math.min(1, fraccion));
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  s.setAttribute("viewBox", "0 0 76 76"); s.setAttribute("width", "92"); s.setAttribute("height", "92"); s.setAttribute("aria-hidden", "true");
+  s.innerHTML = `<circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--linea)" stroke-width="8"/>` +
+    (f <= 0 ? "" : `<circle cx="38" cy="38" r="${r}" fill="none" stroke="${f >= 1 ? "var(--rojo-claro)" : "var(--raya)"}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${(c * f).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 38 38)"/>`) +
+    `<text x="38" y="43" text-anchor="middle" fill="var(--tinta)" style="font:700 17px var(--titulo)">${texto}</text>`;
+  return s;
 }
-function tarjetaIeps() {
-  const caja = el("div", { class: "tablero", hidden: true, "aria-live": "polite" });
+function duracionCorta(ms) { const h = Math.floor(ms / 3600e3), m = Math.floor((ms % 3600e3) / 60e3); return h + ":" + String(m).padStart(2, "0"); }
+function tableroTurno() {
+  const t = turnoActual(), ahora = Date.now();
+  const caja = el("section", { class: "tablero", "aria-label": "Tu turno" });
+  if (!t) {
+    caja.append(el("div", { class: "tablero-fila" }, medidor(0, "0:00"),
+      el("div", null, el("p", { class: "etiqueta" }, "SIN TURNO"), el("p", { class: "titular" }, "¿Arrancas?"),
+        el("p", { class: "chico" }, "Cabina cuenta tus horas y te avisa la pausa."))));
+    return caja;
+  }
+  if (t.terminado) {
+    const libre = t.terminado + 8 * 3600e3, listo = ahora >= libre;
+    caja.append(el("div", { class: "tablero-fila" }, medidor(listo ? 1 : (ahora - t.terminado) / (8 * 3600e3), listo ? "OK" : duracionCorta(libre - ahora)),
+      el("div", null, el("p", { class: "etiqueta" }, "DESCANSO"), el("p", { class: "titular" }, listo ? "Ya puedes arrancar" : "Hasta las " + horaCorta(new Date(libre))),
+        el("p", { class: "chico" }, "8 h corridas (NOM-087)."))));
+    return caja;
+  }
+  const man = manejado(t, ahora), pausa = enPausa(t), sp = siguientePausa(t);
+  const ult = t.pausas[t.pausas.length - 1];
+  const desde = ult && ult.fin ? ult.fin : t.inicio;
+  const tramo = pausa ? 0 : (ahora - desde) / (5 * 3600e3);
+  caja.append(el("a", { class: "tablero-fila", href: "#/horas" }, medidor(tramo, duracionCorta(man)),
+    el("div", null, el("p", { class: "etiqueta" }, pausa ? "EN PAUSA" : "MANEJANDO"),
+      el("p", { class: "titular" + (!pausa && ahora >= sp ? " urgente-texto" : "") }, pausa ? "Mínimo hasta las " + horaCorta(new Date(ult.ini + 30 * 60e3)) : (ahora >= sp ? "¡Toca tu pausa!" : "Pausa a las " + horaCorta(new Date(sp)))),
+      el("p", { class: "chico" }, "Quedan " + duracion(Math.max(0, 14 * 3600e3 - man)) + " de 14 h."))));
+  return caja;
+}
+
+function accionesRapidas() {
+  const t = turnoActual();
+  const activo = t && !t.terminado;
+  const pausa = activo && enPausa(t);
+  const turno = !activo
+    ? el("button", { class: "accion senal-verde", onclick: () => { arrancarTurno(); ir(); avisar("Turno iniciado. Te aviso de la pausa."); } }, icono("arrancar", 26), "Empecé a manejar")
+    : el("button", { class: "accion senal-verde", onclick: () => { alternarPausa(); ir(); } }, icono(pausa ? "arrancar" : "pausa", 26), pausa ? "Terminé mi pausa" : "Empiezo mi pausa");
+  return el("div", { class: "acciones" },
+    el("a", { class: "accion senal-rojo", href: "#/emergencia" }, icono("telefono", 26), "Emergencia"),
+    turno,
+    el("a", { class: "accion senal-amarillo", href: "#/gastos?nuevo" }, icono("mas", 26), "Gasto"),
+    el("a", { class: "accion senal-amarillo", href: "#/bitacora?nuevo" }, icono("mas", 26), "Bitácora"));
+}
+
+function tiraIeps() {
+  const caja = el("a", { class: "tira", hidden: true, href: "../#km1" });
   // Cuando Cabina vive en soterramirez.dev/herramientas, el IEPS sale de datos/carretera.json del sitio.
   fetch("../datos/carretera.json", { cache: "no-cache" }).then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => {
     const i = (d.ieps || [])[0]; if (!i) return;
     const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
     const viejo = diaDesdeISO(i.semana_fin) < hoy;
-    caja.append(el("p", { class: "chico" }, "IEPS del diésel · " + fechaCorta(diaDesdeISO(i.semana_inicio)) + " al " + fechaCorta(diaDesdeISO(i.semana_fin))),
-      el("p", { class: "grande" }, i.estimulo_pct + " % de estímulo"),
-      el("p", { class: "chico" }, viejo ? "Esperando el acuerdo de esta semana en el DOF." : "Cuota que se paga: $" + i.cuota.toFixed(4) + " por litro · acuerdo " + i.acuerdo));
+    const corta = (iso) => fechaCorta(diaDesdeISO(iso)).replace(/ \d{4}$/, "");
+    caja.append(el("span", null, "IEPS diésel · " + (viejo ? "esperando acuerdo nuevo" : corta(i.semana_inicio) + " al " + corta(i.semana_fin))),
+      el("strong", null, i.estimulo_pct + " %"));
     caja.hidden = false;
   }).catch(() => {});
   return caja;
 }
-function inicio() {
+
+function letrero(h) {
+  return el("a", { class: "letrero senal-" + (h.urgente ? "rojo" : SENAL[h.grupo]), href: "#/" + h.id },
+    icono(h.icono, 26), el("span", null, h.titulo), icono("flecha", 20, "flecha"));
+}
+
+// ───────── Pestañas ─────────
+function pestanaCamino() {
   const instalar = el("div", { class: "caja instalar", hidden: true },
     el("p", null, el("strong", null, "Instala Cabina en tu celular."), " Abre sin señal y tus datos no se borran."),
     el("button", { class: "principal", onclick: async () => { if (!instalador) return; instalador.prompt(); await instalador.userChoice; instalador = null; instalar.hidden = true; } }, "Instalar Cabina"));
   const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent), instalada = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
   if (instalador && !instalada) instalar.hidden = false;
-  const ios = esIOS && !instalada ? el("p", { class: "aviso" }, "En iPhone: toca Compartir y luego «Agregar a inicio». Así Cabina guarda tus datos sin que Safari los borre.") : null;
-  vista.append(
-    el("h1", { class: "sr-only" }, "Cabina, herramientas para operadores"),
-    tarjetaTurno() || "", tarjetaIeps(),
-    ...GRUPOS.flatMap((g) => [el("h2", { class: "grupo" }, g), el("div", { class: "rejilla" },
-      ...HERRAMIENTAS.filter((h) => h.grupo === g).map((h) => el("a", { class: "boton-herramienta" + (h.urgente ? " urgente" : ""), href: "#/" + h.id },
-        el("span", { class: "icono", "aria-hidden": "true" }, h.icono), h.titulo)))]),
-    instalar, ios || "");
+  const bienvenida = leer("bienvenida", null) ? "" : tarjetaBienvenida(() => { guardar("bienvenida", new Date().toISOString()); ir(); });
+  vista.append(el("h1", { class: "sr-only" }, "Cabina, en el camino"),
+    bienvenida, tableroTurno(), accionesRapidas(), tiraIeps(),
+    el("h2", { class: "grupo" }, "En el camino"),
+    el("div", { class: "letreros" }, ...HERRAMIENTAS.filter((h) => h.grupo === "Camino" && h.id !== "emergencia").map(letrero)),
+    instalar,
+    esIOS && !instalada ? el("p", { class: "aviso" }, "En iPhone: toca Compartir y luego «Agregar a inicio». Así Cabina guarda tus datos sin que Safari los borre.") : "");
+}
+function pestanaGrupo(grupo, titulo, sub) {
+  vista.append(el("h1", null, titulo), el("p", { class: "suave" }, sub),
+    el("div", { class: "letreros" }, ...HERRAMIENTAS.filter((h) => h.grupo === grupo).map(letrero)));
 }
 
 // ───────── Mis datos y respaldo ─────────
 function misDatos() {
   const n = Object.keys(todasLasClaves()).length;
-  const estado = el("p", { class: "suave" }, "Revisando el almacenamiento…");
+  const estado = el("p", { class: "suave" }, "");
   if (navigator.storage && navigator.storage.persisted) navigator.storage.persisted().then((p) => {
     estado.textContent = p ? "Almacenamiento protegido: el navegador no borrará tus datos por falta de espacio." : "Almacenamiento normal. Instala Cabina o toca «Proteger mis datos».";
-  }); else estado.textContent = "";
+  });
   const archivo = el("input", { type: "file", accept: "application/json,.json", hidden: true, onchange: restaurar });
   async function respaldar() {
     const datos = { app: "cabina", version: 1, fecha: new Date().toISOString(), datos: todasLasClaves() };
@@ -73,7 +137,7 @@ function misDatos() {
     e.target.value = "";
   }
   const ult = leer("ultimo-respaldo", null);
-  vista.append(...encabezado("Mis datos y respaldo", "Todo lo que guardas en Cabina vive solo en este celular. Nadie más lo ve."),
+  vista.append(el("h1", null, "Mis datos"), el("p", { class: "suave" }, "Todo lo que guardas en Cabina vive solo en este celular. Nadie más lo ve."),
     el("div", { class: "caja" },
       el("p", null, "Tienes " + n + " apartados con datos guardados."), estado,
       el("p", { class: "suave" }, ult ? "Último respaldo: " + fechaCorta(new Date(ult)) + "." : "Todavía no haces ningún respaldo."),
@@ -82,9 +146,13 @@ function misDatos() {
         el("button", { class: "secundario", onclick: () => archivo.click() }, "Restaurar un respaldo"),
         el("button", { class: "secundario", onclick: async () => { const ok = navigator.storage && navigator.storage.persist ? await navigator.storage.persist() : false; avisar(ok ? "Listo: tus datos quedan protegidos." : "Tu navegador no lo permitió. Instala Cabina para protegerlos."); ir(); } }, "Proteger mis datos")),
       archivo),
-    el("p", { class: "aviso" }, "Tus datos se pierden si borras los datos del navegador, desinstalas Cabina o cambias de celular. Haz un respaldo y mándatelo por WhatsApp o correo."),
+    el("p", { class: "aviso" }, "Tus datos se pierden si borras los datos del navegador, desinstalas Cabina o cambias de celular. Haz un respaldo y mándatelo por WhatsApp o correo. Cuidarlos es tu responsabilidad: Cabina no los puede recuperar."),
     el("div", { class: "caja" }, el("h2", null, "Borrar todo"), el("p", { class: "suave" }, "Borra turnos, gastos, bitácora y fechas de este celular. No se puede deshacer."),
-      el("button", { class: "peligro", onclick: () => { if (confirm("¿Borrar todos tus datos de Cabina en este celular? No se puede deshacer.")) { borrarTodo(); avisar("Datos borrados."); ir(); } } }, "Borrar todos mis datos")));
+      el("button", { class: "peligro", onclick: () => { if (confirm("¿Borrar todos tus datos de Cabina en este celular? No se puede deshacer.")) { borrarTodo(); avisar("Datos borrados."); ir(); } } }, "Borrar todos mis datos")),
+    el("div", { class: "letreros" },
+      el("a", { class: "letrero senal-azul", href: "#/ayuda" }, icono("documento", 26), el("span", null, "¿Cómo se usa Cabina?"), icono("flecha", 20, "flecha")),
+      el("a", { class: "letrero senal-azul", href: "#/aviso" }, icono("escudo", 26), el("span", null, "Aviso de responsabilidad"), icono("flecha", 20, "flecha")),
+      el("a", { class: "letrero senal-azul", href: "#/acerca" }, icono("persona", 26), el("span", null, "Acerca de Cabina"), icono("flecha", 20, "flecha"))));
 }
 
 function acerca() {
@@ -95,29 +163,51 @@ function acerca() {
       el("p", null, "El código es abierto: ", el("a", { href: "https://github.com/SoterRamirez/cabina", target: "_blank", rel: "noopener" }, "github.com/SoterRamirez/cabina"), "."),
       el("p", null, "¿Viste un error o se te ocurre otra herramienta? Escríbeme en ", el("a", { href: "https://facebook.com/SoterRamirez", target: "_blank", rel: "noopener" }, "Facebook"), " o súmate al ",
         el("a", { href: "https://www.facebook.com/groups/bolsadetrabajoparaoperadores", target: "_blank", rel: "noopener" }, "grupo de la 57"), "."),
-      el("p", null, el("a", { href: "../" }, "Volver a soterramirez.dev"))));
+      el("p", null, el("a", { href: "../" }, "Volver a soterramirez.dev"))),
+    el("div", { class: "caja" },
+      el("h2", null, "Apoya a Cabina"),
+      el("p", null, "Cabina es y seguirá siendo gratis. Si te ha servido y quieres echarle la mano, puedes regalarme algo de mi lista de Amazon."),
+      el("a", { class: "boton principal", href: "https://www.amazon.com.mx/hz/wishlist/ls/I2WAB3ROFPTZ", target: "_blank", rel: "noopener nofollow" }, "Ver mi lista de Amazon")));
 }
 
-// ───────── Rutas ─────────
+// ───────── Barra inferior y rutas ─────────
+function pintarBarra(activa) {
+  barra.replaceChildren(...PESTANAS.map((p) => el("a", { href: "#/" + p.ruta, class: "pestana" + (p.ruta === activa ? " activa senal-texto-" + p.senal : ""), "aria-current": p.ruta === activa ? "page" : null },
+    icono(p.icono, 24), el("span", null, p.titulo))));
+}
+
 function ir() {
   if (limpiar) { try { limpiar(); } catch { /* nada */ } limpiar = null; }
   vista.replaceChildren();
-  const id = (location.hash.replace(/^#\/?/, "") || "").split("?")[0];
+  const [id, extra] = location.hash.replace(/^#\/?/, "").split("?");
   const h = HERRAMIENTAS.find((x) => x.id === id);
-  if (h) { document.title = h.titulo + " · Cabina"; limpiar = h.vista(vista) || null; }
-  else if (id === "mis-datos") { document.title = "Mis datos · Cabina"; misDatos(); }
-  else if (id === "acerca") { document.title = "Acerca de · Cabina"; acerca(); }
-  else { document.title = "Cabina · herramientas para operadores"; inicio(); }
-  if (id) { vista.focus({ preventScroll: true }); }
+  let activa = "";
+  if (h) {
+    document.title = h.titulo + " · Cabina";
+    limpiar = h.vista(vista) || null;
+    activa = (PESTANAS.find((p) => p.grupo === h.grupo) || PESTANAS[0]).ruta;
+    const volver = vista.querySelector(".volver"); if (volver) volver.setAttribute("href", "#/" + activa);
+    const titulo = vista.querySelector("h1"); if (titulo) titulo.classList.add("senal-borde-" + (h.urgente ? "rojo" : SENAL[h.grupo]));
+    if (extra === "nuevo") setTimeout(() => { const forms = vista.querySelectorAll("form"); const c = (forms[forms.length - 1] || vista).querySelector("input, select"); if (c) c.focus(); }, 50);
+  } else if (id === "tramites") { activa = id; document.title = "Trámites · Cabina"; pestanaGrupo("Trámites", "Trámites y normas", "Lo que pide la autoridad, con la fuente oficial."); }
+  else if (id === "cuentas") { activa = id; document.title = "Cuentas · Cabina"; pestanaGrupo("Cuentas", "Cuentas y bitácora", "Tus números del viaje, guardados solo en tu celular."); }
+  else if (id === "mis-datos") { activa = id; document.title = "Mis datos · Cabina"; misDatos(); }
+  else if (id === "acerca") { activa = "mis-datos"; document.title = "Acerca de · Cabina"; acerca(); vista.querySelector(".volver")?.setAttribute("href", "#/mis-datos"); }
+  else if (id === "ayuda") { activa = "mis-datos"; document.title = "Cómo se usa · Cabina"; vistaAyuda(vista); vista.querySelector(".volver")?.setAttribute("href", "#/mis-datos"); }
+  else if (id === "aviso") { activa = "mis-datos"; document.title = "Aviso de responsabilidad · Cabina"; vistaAviso(vista); vista.querySelector(".volver")?.setAttribute("href", "#/mis-datos"); }
+  else { document.title = "Cabina · herramientas para operadores"; pestanaCamino(); }
+  pintarBarra(activa);
+  if (id) vista.focus({ preventScroll: true });
   window.scrollTo(0, 0);
 }
 window.addEventListener("hashchange", ir);
 
-// Sin señal
+// El tablero se refresca solo cada 30 s mientras estás en Camino.
+setInterval(() => { if (!location.hash || location.hash === "#/") ir(); }, 30e3);
+
 const red = document.getElementById("estado-red");
 function revisarRed() { red.hidden = navigator.onLine; }
 window.addEventListener("online", revisarRed); window.addEventListener("offline", revisarRed);
-
 window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); instalador = e; if (!location.hash || location.hash === "#/") ir(); });
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});

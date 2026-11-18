@@ -123,6 +123,6 @@ export function csv(filas) {
 }
 
 export function encabezado(titulo, subtitulo) {
-  return [el("a", { class: "volver", href: "#/" }, "← Todas las herramientas"),
+  return [el("a", { class: "volver", href: "#/" }, "← Volver"),
     el("h1", null, titulo), subtitulo ? el("p", { class: "suave" }, subtitulo) : null];
 }

@@ -171,9 +171,9 @@ function vistaBitacora(cont) {
 }
 
 export const HERRAMIENTAS_CUENTAS = [
-  { id: "gastos", titulo: "Gastos del viaje", icono: "💵", grupo: "Cuentas y bitácora", vista: vistaGastos },
-  { id: "bitacora", titulo: "Bitácora personal", icono: "📒", grupo: "Cuentas y bitácora", vista: vistaBitacora },
-  { id: "diesel", titulo: "Diésel", icono: "⛽", grupo: "Cuentas y bitácora", vista: vistaDiesel },
-  { id: "ganancia", titulo: "Ganancia por km", icono: "📈", grupo: "Cuentas y bitácora", vista: vistaGanancia },
-  { id: "convertir", titulo: "Convertidor", icono: "📏", grupo: "Cuentas y bitácora", vista: vistaConvertir }
+  { id: "gastos", titulo: "Gastos del viaje", icono: "dinero", grupo: "Cuentas", vista: vistaGastos },
+  { id: "bitacora", titulo: "Bitácora personal", icono: "libreta", grupo: "Cuentas", vista: vistaBitacora },
+  { id: "diesel", titulo: "Diésel", icono: "diesel", grupo: "Cuentas", vista: vistaDiesel },
+  { id: "ganancia", titulo: "Ganancia por km", icono: "grafica", grupo: "Cuentas", vista: vistaGanancia },
+  { id: "convertir", titulo: "Convertidor", icono: "regla", grupo: "Cuentas", vista: vistaConvertir }
 ];

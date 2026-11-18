@@ -95,3 +95,79 @@ button, .boton { font: 700 17px var(--texto); padding: 12px 18px; border-radius:
 .tabla td:last-child { text-align: right; font-family: var(--mono); }
 @media (max-width: 380px) { h1 { font-size: 30px; } .reloj { font-size: 40px; } }
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ───────── v2 · Tablero de cabina con colores de señalamiento ───────── */
+/* La cabina va siempre en oscuro: no deslumbra de noche y se lee con sol. */
+:root {
+  color-scheme: dark;
+  --asfalto: #0B1420; --superficie: #12203A; --linea: #24344A; --tinta: #E8EEF6; --suave: #A7B6CA;
+  --pizarra: #8FB3E0; --senal: #6FA8EE; --sobre-senal: #0B1420; --cielo: #16263D;
+  --peligro: #FDA29B; --bien: #75E0A7; --rojo-claro: #F97066;
+  --verde: #0F6E3E; --azul: #1F5FAE; --amarillo: #F2B705; --rojo: #B42318;
+}
+body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+.barra { border-bottom-width: 3px; }
+
+/* Tablero del turno */
+.tablero { background: var(--superficie); color: var(--tinta); border: 1px solid var(--linea); border-radius: 18px; padding: 12px 14px; margin-bottom: 12px; }
+.tablero-fila { display: flex; align-items: center; gap: 14px; color: inherit; text-decoration: none; }
+.tablero .etiqueta { font: 500 12px var(--mono); letter-spacing: 1.5px; color: var(--raya); margin: 0; }
+.tablero .titular { font: 700 26px/1.1 var(--titulo); margin: 2px 0; }
+.tablero .chico { font-size: 14px; color: var(--suave); margin: 0; }
+.urgente-texto { color: var(--rojo-claro); }
+
+/* Acciones rápidas, del tamaño del pulgar */
+.acciones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.accion { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 92px; padding: 10px;
+  border-radius: 16px; font: 700 17px/1.15 var(--texto); text-align: center; text-decoration: none; border: 0; cursor: pointer; }
+
+/* Colores de señalamiento: rojo urgencia, verde camino, azul informativo, amarillo cuentas.
+   El borde blanco interior imita el filo de los letreros de carretera. */
+.senal-rojo { background: var(--rojo); color: #fff; box-shadow: inset 0 0 0 3px rgba(255,255,255,.85); }
+.senal-verde { background: var(--verde); color: #fff; box-shadow: inset 0 0 0 3px rgba(255,255,255,.85); }
+.senal-azul { background: var(--azul); color: #fff; box-shadow: inset 0 0 0 3px rgba(255,255,255,.85); }
+.senal-amarillo { background: var(--amarillo); color: #0E1B2E; box-shadow: inset 0 0 0 3px #0E1B2E; }
+.accion:active, .letrero:active { transform: scale(.98); }
+
+.tira { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 14px; margin-bottom: 6px;
+  border-radius: 12px; background: var(--superficie); border: 1px solid var(--linea); color: var(--suave); text-decoration: none; font-size: 15px; }
+.tira strong { color: var(--raya); font: 700 20px var(--titulo); }
+.tira[hidden] { display: none; }
+
+/* Letreros: una herramienta por renglón, como señal de carretera */
+.letreros { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.letrero { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 12px 16px; border-radius: 10px;
+  font: 700 18px/1.2 var(--texto); text-decoration: none; }
+.letrero span { flex: 1; }
+.letrero .flecha { opacity: .85; }
+
+/* Título de cada herramienta con la franja de su color */
+h1[class*="senal-borde-"] { padding-left: 12px; border-left: 6px solid; border-radius: 0; }
+.senal-borde-verde { border-color: #2EA866 !important; }
+.senal-borde-azul { border-color: var(--senal) !important; }
+.senal-borde-amarillo { border-color: var(--amarillo) !important; }
+.senal-borde-rojo { border-color: var(--rojo-claro) !important; }
+
+/* Barra inferior */
+.barra-inferior { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; display: grid; grid-template-columns: repeat(4, 1fr);
+  background: var(--noche); border-top: 1px solid var(--linea); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+.pestana { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; color: var(--suave); text-decoration: none;
+  font-size: 13px; font-weight: 600; border-radius: 10px; min-height: 52px; justify-content: center; }
+.pestana.activa { background: var(--superficie); }
+.senal-texto-verde { color: #4ADE80; } .senal-texto-azul { color: var(--senal); } .senal-texto-amarillo { color: var(--amarillo); } .senal-texto-gris { color: var(--tinta); }
+.principal { background: var(--amarillo); color: #0E1B2E; }
+.resultado { background: var(--cielo); }
+@media (min-width: 760px) { .barra-inferior { max-width: 760px; margin: 0 auto; border-radius: 16px 16px 0 0; border: 1px solid var(--linea); } }
+
+/* Instructivo y bienvenida */
+.bienvenida { border: 2px solid var(--amarillo); }
+.lista-corta { padding-left: 20px; margin: 0 0 12px; }
+.lista-corta li { margin: 4px 0; }
+.pasos { list-style: none; padding: 0; margin: 0 0 14px; display: flex; flex-direction: column; gap: 10px; }
+.paso { display: flex; gap: 12px; background: var(--superficie); border: 1px solid var(--linea); border-radius: 14px; padding: 14px; }
+.paso-num { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--verde); color: #fff; display: flex; align-items: center; justify-content: center;
+  font: 700 18px var(--titulo); box-shadow: inset 0 0 0 2px rgba(255,255,255,.85); }
+.paso p { margin: 6px 0 0; color: var(--suave); }
+.lista-colores { list-style: none; padding: 0; margin: 0; }
+.lista-colores li { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+.muestra { width: 28px; height: 20px; border-radius: 4px; flex: none; }

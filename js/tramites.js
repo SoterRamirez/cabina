@@ -138,9 +138,9 @@ function vistaEmergencia(cont) {
 }
 
 export const HERRAMIENTAS_TRAMITES = [
-  { id: "emergencia", titulo: "Emergencias", icono: "🆘", grupo: "En el camino", vista: vistaEmergencia, urgente: true },
-  { id: "iave", titulo: "Doble cobro IAVE", icono: "🧾", grupo: "Normas y trámites", vista: vistaIave },
-  { id: "constancia", titulo: "Constancia y licencia", icono: "🪪", grupo: "Normas y trámites", vista: vistaConstancia },
-  { id: "sedes", titulo: "Sedes apto médico", icono: "📍", grupo: "Normas y trámites", vista: vistaSedes },
-  { id: "sict", titulo: "¿Mensaje SICT real?", icono: "🛡️", grupo: "Normas y trámites", vista: vistaSict }
+  { id: "emergencia", titulo: "Emergencias", icono: "telefono", grupo: "Camino", vista: vistaEmergencia, urgente: true },
+  { id: "iave", titulo: "Doble cobro IAVE", icono: "recibo", grupo: "Trámites", vista: vistaIave },
+  { id: "constancia", titulo: "Constancia y licencia", icono: "credencial", grupo: "Trámites", vista: vistaConstancia },
+  { id: "sedes", titulo: "Sedes apto médico", icono: "ubicacion", grupo: "Trámites", vista: vistaSedes },
+  { id: "sict", titulo: "¿Mensaje SICT real?", icono: "escudo", grupo: "Trámites", vista: vistaSict }
 ];

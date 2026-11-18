@@ -140,6 +140,19 @@ function vistaHoras(cont) {
   return () => clearInterval(reloj);
 }
 
+// Acciones del turno para el tablero de inicio.
+export { manejado, siguientePausa, enPausa, duracion };
+export function turnoActual() { return estadoTurno(); }
+export function arrancarTurno() {
+  if ("Notification" in window && Notification.permission === "default") Notification.requestPermission().catch(() => {});
+  guardar("turno", { inicio: Date.now(), pausas: [] }); vigilarTurno();
+}
+export function alternarPausa() {
+  const t = estadoTurno(); if (!t || t.terminado) return;
+  if (enPausa(t)) t.pausas[t.pausas.length - 1].fin = Date.now(); else t.pausas.push({ ini: Date.now() });
+  guardar("turno", t);
+}
+
 // ───────── Físico-mecánica por placa ─────────
 const VENTANAS = { 5: "enero a abril", 6: "enero a abril", 7: "marzo a junio", 8: "marzo a junio", 3: "mayo a agosto", 4: "mayo a agosto",
   1: "julio a octubre", 2: "julio a octubre", 9: "septiembre a diciembre", 0: "septiembre a diciembre" };
@@ -218,9 +231,9 @@ function vistaVelocidades(cont) {
 }
 
 export const HERRAMIENTAS_NORMAS = [
-  { id: "horas", titulo: "Horas de manejo", icono: "⏱️", grupo: "En el camino", vista: vistaHoras },
-  { id: "previaje", titulo: "Revisión antes de salir", icono: "✅", grupo: "En el camino", vista: vistaPreviaje },
-  { id: "velocidades", titulo: "Velocidades y alcohol", icono: "🚦", grupo: "En el camino", vista: vistaVelocidades },
-  { id: "fisico", titulo: "Físico-mecánica", icono: "🔧", grupo: "Normas y trámites", vista: vistaFisico },
-  { id: "humo", titulo: "Límite de humo", icono: "💨", grupo: "Normas y trámites", vista: vistaHumo }
+  { id: "horas", titulo: "Horas de manejo", icono: "reloj", grupo: "Camino", vista: vistaHoras },
+  { id: "previaje", titulo: "Revisión antes de salir", icono: "palomita", grupo: "Camino", vista: vistaPreviaje },
+  { id: "velocidades", titulo: "Velocidades y alcohol", icono: "velocimetro", grupo: "Camino", vista: vistaVelocidades },
+  { id: "fisico", titulo: "Físico-mecánica", icono: "llave", grupo: "Trámites", vista: vistaFisico },
+  { id: "humo", titulo: "Límite de humo", icono: "humo", grupo: "Trámites", vista: vistaHumo }
 ];
