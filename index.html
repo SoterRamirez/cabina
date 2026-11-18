@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Cabina · herramientas para operadores</title>
+  <meta name="description" content="Cabina: la navaja suiza del operador. Horas de manejo, físico-mecánica, humo, doble cobro IAVE, emergencias, diésel, gastos y bitácora. Gratis, sin cuenta y funciona sin señal.">
+  <meta name="theme-color" content="#0E1B2E">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="img/marca.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="img/icono-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Cabina">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:title" content="Cabina · herramientas para operadores">
+  <meta property="og:description" content="La navaja suiza del operador. Gratis, sin cuenta y funciona sin señal.">
+  <meta property="og:image" content="https://soterramirez.dev/img/compartir.png">
+  <link rel="stylesheet" href="css/cabina.css">
+</head>
+<body>
+  <a class="saltar" href="#vista">Saltar al contenido</a>
+  <header class="barra">
+    <a class="marca" href="#/" aria-label="Cabina, inicio">
+      <img src="img/marca.svg" width="30" height="30" alt="">
+      <span>CABINA</span>
+    </a>
+    <span class="estado-red" id="estado-red" hidden>Sin señal: todo sigue funcionando</span>
+  </header>
+
+  <main id="vista" tabindex="-1">
+    <noscript><p class="caja">Cabina necesita JavaScript activado en tu navegador.</p></noscript>
+  </main>
+
+  <footer class="pie">
+    <a href="#/mis-datos">Mis datos y respaldo</a>
+    <a href="#/acerca">Acerca de Cabina</a>
+    <span>@SoterRamirez</span>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

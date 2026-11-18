@@ -1,0 +1,190 @@
+{
+ "fuente": "https://www.dof.gob.mx/nota_detalle.php?codigo=5803765&fecha=13/11/2026",
+ "nota": "Sedes del punto TERCERO del acuerdo del Mes del Apto Médico 2026 (DOF 13/11/2026). La lista del DOF tiene numeración con errores; aquí van por nombre.",
+ "sedes": [
+  {
+   "nombre": "Acapulco",
+   "direccion": "Avenida Costera Miguel Alemán 306, C.P. 39300, Acapulco de Juárez, Guerrero."
+  },
+  {
+   "nombre": "Aguascalientes",
+   "direccion": "Julio Díaz Torre 110, Ciudad Industrial C.P. 20290, Aguascalientes, Aguascalientes."
+  },
+  {
+   "nombre": "Bombas",
+   "direccion": "Calzada de Las Bombas 411, C.P. 04920, Col. Girasoles, Alcaldía Coyoacán, Cuidad de México"
+  },
+  {
+   "nombre": "Campeche",
+   "direccion": "Av. De las Palmas s/n, Col. Estación Antigua y 7 de Agosto, Planta Baja. C.P. 24029, Campeche, Campeche."
+  },
+  {
+   "nombre": "Cancún",
+   "direccion": "Calle 2 Oriente Lote 3 Manz 1, Super Manzana 64 C.P. 77524 Cancún, Quintana Roo."
+  },
+  {
+   "nombre": "Chihuahua",
+   "direccion": "Boulevard José Fuentes Mares No. 9401, Col Avalos CP 31074, Chihuahua, Chihuahua."
+  },
+  {
+   "nombre": "Ciudad del Carmen",
+   "direccion": "Aeropuerto Internacional de Ciudad del Carmen, Campeche Av. Aviación S/N C.P. 24119."
+  },
+  {
+   "nombre": "Ciudad Juárez",
+   "direccion": "Av. Vicente Guerrero y Honduras 1815 Oriente, Col. Partido Romero, C.P. 32030, Ciudad Juárez, Chihuahua."
+  },
+  {
+   "nombre": "Cuernavaca",
+   "direccion": "Carretera Cuernavaca - Tepoztlán, Km. 1 + 200, Col. Chamilpa, C.P. 62210, Cuernavaca, Morelos."
+  },
+  {
+   "nombre": "Culiacán",
+   "direccion": "Federalismo 431 Sur, Col. Recursos Hidráulicos, C.P. 80100, Culiacán, Sinaloa."
+  },
+  {
+   "nombre": "Durango",
+   "direccion": "Río Papaloapan No. 222, Fraccionamiento Valle Alegre, C.P. 34110, Durango, Durango."
+  },
+  {
+   "nombre": "Guadalajara Aeropuerto",
+   "direccion": "Aeropuerto Internacional Km 17.5 Carretera Chapala, Col. del Refugio, Tlajumulco, Jalisco."
+  },
+  {
+   "nombre": "Guadalajara Central de Autobuses",
+   "direccion": "Carretera libre a Zapotlanejo, libramiento a Tonalá, C.P. 45500, Tlaquepaque, Jalisco."
+  },
+  {
+   "nombre": "Guadalajara Centro SICT",
+   "direccion": "Av. Lázaro Cárdenas No. 4040 Col. Chapalita, C.P. 45046, Zapopan Jalisco."
+  },
+  {
+   "nombre": "Hermosillo",
+   "direccion": "Boulevard García Morales Num. 215, entre República de Cuba y República de Panama, Col. El Llano, CP 83210, Hermosillo, Son."
+  },
+  {
+   "nombre": "La Paz",
+   "direccion": "Héroes del 47 entre Ignacio Ramírez y Altamirano, Col. El Esterito, C.P. 23020, La Paz, Baja California Sur."
+  },
+  {
+   "nombre": "Lázaro Cárdenas",
+   "direccion": "Edificio SCT, s/n, Col. La Orilla, CP 60990, Lázaro Cárdenas, Michoacán"
+  },
+  {
+   "nombre": "León",
+   "direccion": "Boulevard La Laborcita No. 131, Fraccionamiento San Carlos La Roncha, C.P. 37672, León, Guanajuato."
+  },
+  {
+   "nombre": "Manzanillo",
+   "direccion": "Edificio Federal Capitanía de Puerto, Av. Teniente Azueta s/n, Primer Piso Entrada al Puerto Interior San Pedrito, Col. Burócrata, C.P. 28250, Manzanillo."
+  },
+  {
+   "nombre": "Matamoros",
+   "direccion": "Av. Tercera No. 45, Fraccionamiento Villa Las Torres, C.P. 87398, Matamoros, Tamaulipas."
+  },
+  {
+   "nombre": "Mazatlán",
+   "direccion": "Edif. S.C.T., Av. Juan Carrasco 197, Nte. Primer Piso, Col. Reforma Centro, C.P. 82000, Mazatlán, Sinaloa."
+  },
+  {
+   "nombre": "Mérida",
+   "direccion": "Calle 35 No. 148, Col. Pet Kanche, C.P. 97121, Mérida, Yucatán."
+  },
+  {
+   "nombre": "Mexicali",
+   "direccion": "Calle de la Industria No. 1199, Patios del Ferrocarril, Col. Nacozari, C.P. 21040, Mexicali, Baja California."
+  },
+  {
+   "nombre": "Monterrey Aeropuerto",
+   "direccion": "Carretera Monterrey-Nuevo Laredo Km 1006, 66600 Salinas Victoria, Nuevo León."
+  },
+  {
+   "nombre": "Monterrey Centro",
+   "direccion": "Av. Benito Juárez y Corregidora 1er. Piso, Palacio Federal, Col. Centro, C.P. 67100, Guadalupe, Nuevo León."
+  },
+  {
+   "nombre": "Morelia",
+   "direccion": "Periférico Paseo de la República 7040, Col. Rancho de los Ejidos, C.P. 58146, Morelia, Michoacán."
+  },
+  {
+   "nombre": "Nuevo Laredo",
+   "direccion": "Av. Morelos 1423, (entre Fco. I Madero y Héroes de Nácataz), Sector Centro, C.P. 88000, Nuevo Laredo, Tamaulipas."
+  },
+  {
+   "nombre": "Oaxaca",
+   "direccion": "Kilómetro 6.5 Carretera Cristobal Colón, Tramo: Oaxaca - Tehuantepec, Col. Del Bosque, C.P. 68100, Oaxaca, Oaxaca."
+  },
+  {
+   "nombre": "Pachuca",
+   "direccion": "Boulevard Luis Donaldo Colosio, Km 12, No. 3702, Col. Ex-Hacienda Coscotitlán C.P. 42084, Pachuca, Hidalgo, C.P. 42080."
+  },
+  {
+   "nombre": "Puebla",
+   "direccion": "Carretera Federal Puebla-Sta. Ana Chautempan No. 11403, Col. Industrial San José del Conde; C.P. 72019 Puebla, Puebla."
+  },
+  {
+   "nombre": "Querétaro",
+   "direccion": "Av. Constituyentes No. 174 Poniente, Col. Mariano de las Casas, CP 76030, Querétaro, Querétaro."
+  },
+  {
+   "nombre": "Saltillo",
+   "direccion": "Central de Autobuses, Boulevard Luis Echeverría y Calle Reforma S/N, Col. Bellavista C.P. 25060 Saltillo, Coahuila."
+  },
+  {
+   "nombre": "San Luis Potosi",
+   "direccion": "Avenida Industrias s/n y Eje 106, Col. Zona Industrial C.P. 78395, San Luis Potosí, San Luis Potosí."
+  },
+  {
+   "nombre": "Tampico",
+   "direccion": "Av. Héroes de Chapultepec número. 2306, Esq. Río Soto La Marina Col. Tamaulipas; C.P. 89060 Tampico, Tamaulipas."
+  },
+  {
+   "nombre": "Tehuantepec",
+   "direccion": "Campamento de la S.C.T., Carretera Transístmica, Km 281+500, Barrio Vixhana Santo Domingo, C.P 70760, Tehuantepec, Oaxaca."
+  },
+  {
+   "nombre": "Tepic",
+   "direccion": "Avenida Tecnológico No. 4300 Oriente, Col. Puente de San Cayetano, C.P. 63194, Tepic, Nayarit."
+  },
+  {
+   "nombre": "Tijuana",
+   "direccion": "Fuerza Aérea Mexicana s/n, Col. Aeropuerto, C.P. 22410, Tijuana, Baja California."
+  },
+  {
+   "nombre": "Tlaxcala",
+   "direccion": "Libramiento Poniente km 0+750, Privada Politécnico Nacional, Col. Santa María Acuitlapilco, C.P. 90110, Tlaxcala, Tlaxcala."
+  },
+  {
+   "nombre": "Toluca Aeropuerto",
+   "direccion": "Boulevard Miguel Alemán Valdez S/N, San Pedro Totoltepec, C.P. 50226, Toluca de Lerdo, Mex. Ubicados frente a la puerta 6 del Aeropuerto."
+  },
+  {
+   "nombre": "Toluca Centro",
+   "direccion": "Calle La Igualdad No. 100, Santiago Tlaxomulco, Col. Junta Local de Caminos, C.P.50280, Toluca, Estado de México."
+  },
+  {
+   "nombre": "Torreón",
+   "direccion": "Residencia Múltiple SCT, Eriazo Norte Km. 10+800, Libramiento Periférico, C.P. 27110, Torreón, Coahuila."
+  },
+  {
+   "nombre": "Tuxpan",
+   "direccion": "Sector S.C.T. Ejido La Calzada, Carretera a La Barra Norte, Km 6.5, C.P. 92773, Tuxpan, Veracruz."
+  },
+  {
+   "nombre": "Tuxtla Gutiérrez",
+   "direccion": "Calle 12 Oriente Sur, número 164, Col. Centro, C.P. 29000, Tuxtla Gutiérrez, Chiapas."
+  },
+  {
+   "nombre": "Veracruz",
+   "direccion": "Callejón César Luna Bauza s/n, Col. Ylang Ylang, C.P. 94298, Boca del Río, Veracruz."
+  },
+  {
+   "nombre": "Villahermosa",
+   "direccion": "Privada del Caminero No. 17, Col. 1ro. de Mayo, C.P. 86190, Villahermosa, Tabasco."
+  },
+  {
+   "nombre": "Zacatecas",
+   "direccion": "Vialidad Arroyo de la Plata y Calle SCT No. 301, Col. Zona Industrial, C.P. 98600, Guadalupe, Zacatecas."
+  }
+ ]
+}
