@@ -1,5 +1,5 @@
 // Cabina funciona sin señal: guarda la app en el celular la primera vez que se abre.
-const VERSION = "cabina-v25";
+const VERSION = "cabina-v26";
 const ARCHIVOS = [
   "./", "index.html", "manifest.webmanifest", "css/cabina.css",
   "js/app.js", "js/ui.js", "js/iconos.js", "js/ayuda.js", "js/metricas.js", "js/normas.js", "js/tramites.js", "js/cuentas.js",

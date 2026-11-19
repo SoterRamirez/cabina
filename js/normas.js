@@ -1,5 +1,5 @@
 // Herramientas de normas. Datos verificados en el DOF al 16/11/2026 (SoterRamirez/verificacion-normas).
-import { el, leer, guardar, campo, fuente, encabezado, horaCorta, avisar } from "./ui.js";
+import { el, leer, guardar, campo, fuente, encabezado, horaCorta, avisar, hoyISO } from "./ui.js";
 
 const NOM087 = ["NOM-087-SCT-2-2017, DOF 28/06/2018", "https://dof.gob.mx/nota_detalle.php?codigo=5529381&fecha=28/06/2018"];
 const NOM068 = ["NOM-068-SCT-2-2014, DOF 19/01/2015", "https://dof.gob.mx/nota_detalle.php?codigo=5378850&fecha=19/01/2015"];
@@ -285,17 +285,28 @@ const PUNTOS = [
   "Placa de la quinta rueda sin grietas ni soldaduras y tornillos de grado 8 o más.",
   "Bitácora de horas de servicio contigo (impresa o electrónica)."
 ];
+// La revisión vale por un día: lo palomeado ayer no cuenta hoy. Lo viejo (lista sin fecha) tampoco.
+export function marcasDeHoy(guardado, hoy) {
+  return guardado && !Array.isArray(guardado) && guardado.dia === hoy ? guardado.marcados : [];
+}
+export function textoRevision(marcados, total, ultima) {
+  if (marcados.length < total) return "Llevas " + marcados.length + " de " + total + ".";
+  const base = "Todo revisado hoy" + (ultima ? " a las " + horaCorta(new Date(ultima)) : "");
+  return base + (base.endsWith(".") ? "" : ".") + " Buen viaje."; // «p. m.» ya trae su punto
+}
 function vistaPreviaje(cont) {
-  const marcados = leer("previaje", []);
+  const hoy = hoyISO();
+  const estado = () => { const g = leer("previaje", null); return { marcados: marcasDeHoy(g, hoy), ultima: g && g.dia === hoy ? g.ultima : null }; };
   const cuenta = el("p", { class: "resultado", "aria-live": "polite" });
   const lista = el("ul", { class: "lista check" }, ...PUNTOS.map((p, i) => el("li", null, el("label", null,
-    el("input", { type: "checkbox", checked: marcados.includes(i), onchange: (e) => {
-      const s = new Set(leer("previaje", [])); e.target.checked ? s.add(i) : s.delete(i); guardar("previaje", [...s]); contar(); } }),
+    el("input", { type: "checkbox", checked: estado().marcados.includes(i), onchange: (e) => {
+      const s = new Set(estado().marcados); e.target.checked ? s.add(i) : s.delete(i);
+      guardar("previaje", { dia: hoy, marcados: [...s], ultima: Date.now() }); contar(); } }),
     el("span", null, p)))));
-  function contar() { const n = leer("previaje", []).length; cuenta.textContent = n === PUNTOS.length ? "Todo revisado. Buen viaje." : "Llevas " + n + " de " + PUNTOS.length + "."; }
-  cont.append(...encabezado("Revisión antes de salir", "Aunque traigas la calcomanía vigente, en un retén te pueden revisar y, con una falla crítica, no sigues (NOM-068, 5.2.1.1)."),
+  function contar() { const { marcados, ultima } = estado(); cuenta.textContent = textoRevision(marcados, PUNTOS.length, ultima); }
+  cont.append(...encabezado("Revisión antes de salir", "Aunque traigas la calcomanía vigente, en un retén te pueden revisar y, con una falla crítica, no sigues (NOM-068, 5.2.1.1). Se borra sola cada día."),
     el("div", { class: "caja" }, lista, cuenta,
-      el("div", { class: "botones" }, el("button", { class: "secundario", onclick: () => { guardar("previaje", []); lista.querySelectorAll("input").forEach((c) => { c.checked = false; }); contar(); } }, "Empezar de nuevo"))),
+      el("div", { class: "botones" }, el("button", { class: "secundario", onclick: () => { guardar("previaje", null); lista.querySelectorAll("input").forEach((c) => { c.checked = false; }); contar(); } }, "Empezar de nuevo"))),
     fuente("Tablas de llantas y ruedas (LXXVII), frenos y quinta rueda (LXXIX). Es un recordatorio de lo que más rechazan; no sustituye la verificación en una Unidad de Verificación aprobada.", [NOM068]));
   contar();
 }

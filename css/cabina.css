@@ -217,3 +217,6 @@ input::-webkit-date-and-time-value { text-align: left; }
 
 /* «Borrar este turno» va al final y separado, para no tocarlo por error. */
 .borrar-turno { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--linea); }
+
+/* Al arrastrar el dedo no se selecciona texto ni sale el menú de iOS en listas y botones. */
+.check label, button, .accion, .pestana { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
