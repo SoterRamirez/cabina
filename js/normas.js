@@ -30,6 +30,19 @@ function tramo(t, ahora = Date.now()) {
 function siguientePausa(t) { return tramo(t).desde + 5 * H; }
 function faltaPausa(t, ahora = Date.now()) { return Math.max(0, 30 * M - tramo(t, ahora).acumulada); }
 function minutos(ms) { return Math.ceil(ms / M); }
+// Lo que el cronómetro en vivo debe mostrar: manejo, pausa en curso o descanso.
+function cronometro(t, ahora = Date.now()) {
+  if (!t) return null;
+  if (t.terminado) return { modo: "descanso", ms: Math.max(0, t.terminado + 8 * H - ahora) };
+  const ult = t.pausas[t.pausas.length - 1];
+  if (ult && !ult.fin) return { modo: "pausa", ms: ahora - ult.ini };
+  return { modo: "manejo", ms: manejado(t, ahora) };
+}
+// 1:02:03 · los segundos dejan ver que el reloj sí corre.
+function hms(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return h + ":" + String(m).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+}
 function enPausa(t) { const p = t && t.pausas[t.pausas.length - 1]; return !!(p && !p.fin); }
 function duracion(ms) { const h = Math.floor(ms / H), m = Math.floor((ms % H) / M); return h + " h " + String(m).padStart(2, "0") + " min"; }
 
@@ -74,14 +87,15 @@ export function avisosPendientes(t, ahora, dados = {}) {
   return { mensajes, dados };
 }
 
+export function revisarAvisos() {
+  const { mensajes, dados } = avisosPendientes(estadoTurno(), Date.now(), leer("avisos-turno", {}));
+  if (!mensajes.length) return;
+  guardar("avisos-turno", dados);
+  mensajes.forEach(notificar);
+}
 export function vigilarTurno() {
   clearInterval(alarmaInterval);
-  alarmaInterval = setInterval(() => {
-    const { mensajes, dados } = avisosPendientes(estadoTurno(), Date.now(), leer("avisos-turno", {}));
-    if (!mensajes.length) return;
-    guardar("avisos-turno", dados);
-    mensajes.forEach(notificar);
-  }, 15e3);
+  alarmaInterval = setInterval(revisarAvisos, 15e3);
 }
 
 function vistaHoras(cont) {
@@ -106,7 +120,7 @@ function vistaHoras(cont) {
     if (t.terminado) {
       const libre = t.terminado + 8 * H;
       tablero.append(el("p", { class: "suave" }, "Descanso de 8 h corridas"),
-        el("p", { class: "reloj" }, ahora >= libre ? "Listo" : duracion(libre - ahora)),
+        el("p", { class: "reloj", "data-cronometro": "largo", "aria-live": "off" }, ahora >= libre ? "Listo" : hms(libre - ahora)),
         el("p", null, ahora >= libre ? "Ya cumpliste tus 8 h de descanso." : "Puedes volver a arrancar a las " + horaCorta(new Date(libre))),
         el("p", { class: "suave" }, "Manejaste " + duracion(man) + " en este turno."),
         el("div", { class: "botones" }, el("button", { class: "principal", onclick: () => {
@@ -117,8 +131,9 @@ function vistaHoras(cont) {
     const pausa = enPausa(t);
     const sp = siguientePausa(t);
     tablero.append(
-      el("p", { class: "suave" }, pausa ? "En pausa desde " + horaCorta(new Date(t.pausas[t.pausas.length - 1].ini)) : "Manejando desde " + horaCorta(new Date(t.inicio))),
-      el("p", { class: "reloj" }, duracion(man)),
+      el("p", { class: "suave" }, pausa ? "Pausa en curso desde " + horaCorta(new Date(t.pausas[t.pausas.length - 1].ini)) : "Manejando desde " + horaCorta(new Date(t.inicio))),
+      el("p", { class: "reloj", "data-cronometro": "largo", "aria-live": "off" }, hms(cronometro(t, ahora).ms)),
+      pausa ? el("p", { class: "suave" }, "Llevas " + duracion(man) + " de manejo en este turno.") : null,
       el("p", null, "De 14 h de manejo te quedan " + duracion(Math.max(0, 14 * H - man)) + "."),
       pausa ? el("p", null, faltaPausa(t, ahora) > 0
           ? "Para completar 30 min de pausa te faltan " + minutos(faltaPausa(t, ahora)) + " min: hasta las " + horaCorta(new Date(ahora + faltaPausa(t, ahora)))
@@ -173,7 +188,7 @@ function vistaHoras(cont) {
 }
 
 // Acciones del turno para el tablero de inicio.
-export { manejado, siguientePausa, enPausa, duracion, faltaPausa, tramo, minutos };
+export { manejado, siguientePausa, enPausa, duracion, faltaPausa, tramo, minutos, cronometro, hms };
 export function turnoActual() { return estadoTurno(); }
 export function arrancarTurno() {
   if ("Notification" in window && Notification.permission === "default") Notification.requestPermission().catch(() => {});

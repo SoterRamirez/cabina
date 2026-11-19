@@ -196,3 +196,17 @@ input::-webkit-date-and-time-value { text-align: left; }
 .aviso-vence { border: 2px solid var(--rojo-claro); }
 .aviso-vence .etiqueta-vence { font: 500 12px var(--mono); letter-spacing: 1.5px; color: var(--rojo-claro); margin: 0 0 6px; }
 .aviso-vence .texto-vence { font-weight: 700; margin: 0 0 6px; }
+
+/* Cronómetro en vivo */
+.reloj { font-variant-numeric: tabular-nums; }
+.cronometro-chico { display: flex; align-items: center; gap: 6px; font: 500 13px var(--mono) !important; color: var(--raya) !important; margin-top: 4px !important; font-variant-numeric: tabular-nums; }
+.punto-vivo { width: 8px; height: 8px; border-radius: 50%; background: var(--raya); animation: latido 1.6s ease-in-out infinite; }
+@keyframes latido { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .punto-vivo { animation: none; } }
+
+/* Zonas de toque de al menos 44 px (guía de Apple) para usarse con el dedo en la cabina */
+.volver { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px 0 0; }
+.marca { min-height: 44px; }
+.fuente summary { display: flex; align-items: center; min-height: 44px; }
+.lista button { min-height: 44px; }
+.telefono a[href^="https"] { display: inline-flex; align-items: center; min-height: 44px; }

@@ -13,7 +13,7 @@ globalThis.localStorage = {
   get length() { return memoria.size; }
 };
 
-const { manejado, siguientePausa, enPausa, faltaPausa, tramo, alternarPausa, avisosPendientes, turnoActual } = await import("../js/normas.js");
+const { manejado, siguientePausa, enPausa, faltaPausa, tramo, alternarPausa, avisosPendientes, turnoActual, cronometro, hms } = await import("../js/normas.js");
 const { horaCorta } = await import("../js/ui.js");
 
 const M = 60e3, H = 3600e3;
@@ -185,5 +185,31 @@ describe("Formato de la hora", () => {
   test("mediodía y medianoche", () => {
     assert.equal(horaCorta(new Date(2026, 10, 18, 12, 0)), "12:00 p. m.");
     assert.equal(horaCorta(new Date(2026, 10, 18, 0, 5)), "12:05 a. m.");
+  });
+});
+
+describe("Cronómetro en vivo", () => {
+  test("manejando, cuenta el manejo y avanza segundo a segundo", () => {
+    const t = turno();
+    assert.deepEqual(cronometro(t, T0 + 3 * M + 12e3), { modo: "manejo", ms: 3 * M + 12e3 });
+    assert.equal(hms(cronometro(t, T0 + 3 * M + 13e3).ms), "0:03:13");
+  });
+  test("ERROR YA VISTO: en pausa el reloj cuenta la pausa (antes se veía congelado)", () => {
+    const t = turno(pausa(60));
+    assert.deepEqual(cronometro(t, T0 + 72 * M), { modo: "pausa", ms: 12 * M });
+  });
+  test("al terminar la pausa vuelve a contar el manejo sin la pausa", () => {
+    const t = turno(pausa(60, 30));
+    assert.equal(cronometro(t, T0 + 100 * M).ms, 70 * M);
+  });
+  test("en descanso cuenta lo que falta de las 8 h", () => {
+    const t = { ...turno(), terminado: T0 + 10 * H };
+    assert.deepEqual(cronometro(t, T0 + 11 * H), { modo: "descanso", ms: 7 * H });
+    assert.equal(cronometro(t, T0 + 20 * H).ms, 0);
+  });
+  test("formato h:mm:ss", () => {
+    assert.equal(hms(0), "0:00:00");
+    assert.equal(hms(3723000), "1:02:03");
+    assert.equal(hms(-5), "0:00:00");
   });
 });

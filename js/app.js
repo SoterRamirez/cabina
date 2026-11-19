@@ -1,6 +1,6 @@
 // Cabina · la navaja suiza del operador. Sin cuentas, sin servidor: todo vive en tu celular.
 import { el, leer, guardar, todasLasClaves, borrarTodo, encabezado, avisar, compartirArchivo, hoyISO, diaDesdeISO, fechaCorta, horaCorta } from "./ui.js";
-import { HERRAMIENTAS_NORMAS, vigilarTurno, turnoActual, arrancarTurno, alternarPausa, manejado, siguientePausa, enPausa, duracion, faltaPausa } from "./normas.js";
+import { HERRAMIENTAS_NORMAS, vigilarTurno, revisarAvisos, turnoActual, arrancarTurno, alternarPausa, manejado, siguientePausa, enPausa, duracion, faltaPausa, cronometro, hms } from "./normas.js";
 import { HERRAMIENTAS_TRAMITES, vencimientosProximos, enMesDelApto, textoVencimiento } from "./tramites.js";
 import { HERRAMIENTAS_CUENTAS } from "./cuentas.js";
 import { icono } from "./iconos.js";
@@ -35,6 +35,7 @@ function medidor(fraccion, texto, etiqueta = "manejo") {
     `<text x="38" y="53" text-anchor="middle" fill="var(--suave)" style="font:500 9px var(--texto)">${etiqueta}</text>`;
   return s;
 }
+function mmss(ms) { const s = Math.max(0, Math.floor(ms / 1000)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
 function duracionCorta(ms) { const h = Math.floor(ms / 3600e3), m = Math.floor((ms % 3600e3) / 60e3); return h + ":" + String(m).padStart(2, "0"); }
 function tableroTurno() {
   const t = turnoActual(), ahora = Date.now();
@@ -54,12 +55,14 @@ function tableroTurno() {
   }
   const man = manejado(t, ahora), pausa = enPausa(t), sp = siguientePausa(t);
   const ult = t.pausas[t.pausas.length - 1];
-  // Avance del tramo de 5 h (solo se reinicia al juntar 30 min de pausa).
-  const tramo = pausa ? 0 : 1 - (sp - ahora) / (5 * 3600e3);
-  caja.append(el("a", { class: "tablero-fila", href: "#/horas" }, medidor(tramo, duracionCorta(man)),
+  // Manejando: avance del tramo de 5 h. En pausa: avance hacia los 30 min, y el número es la pausa corriendo.
+  const avance = pausa ? 1 - faltaPausa(t, ahora) / (30 * 60e3) : 1 - (sp - ahora) / (5 * 3600e3);
+  const fila = el("a", { class: "tablero-fila", href: "#/horas" }, medidor(avance, pausa ? mmss(ahora - ult.ini) : duracionCorta(man), pausa ? "pausa" : "manejo"),
     el("div", null, el("p", { class: "etiqueta" }, pausa ? "EN PAUSA" : "MANEJANDO"),
       el("p", { class: "titular" + (!pausa && ahora >= sp ? " urgente-texto" : "") }, pausa ? (faltaPausa(t, ahora) > 0 ? "Mínimo hasta las " + horaCorta(new Date(ahora + faltaPausa(t, ahora))) : "Pausa completa") : (ahora >= sp ? "¡Toca tu pausa!" : "Pausa a las " + horaCorta(new Date(sp)))),
-      el("p", { class: "chico" }, "Quedan " + duracion(Math.max(0, 14 * 3600e3 - man)) + " de 14 h."))));
+      el("p", { class: "chico" }, "Quedan " + duracion(Math.max(0, 14 * 3600e3 - man)) + " de 14 h."),
+      el("p", { class: "chico cronometro-chico" }, el("span", { class: "punto-vivo", "aria-hidden": "true" }), (pausa ? "Pausa " : "Manejo ") , el("span", { "data-cronometro": "largo" }, hms(cronometro(t, ahora).ms)))));
+  caja.append(fila);
   return caja;
 }
 
@@ -248,6 +251,22 @@ function ir() {
   if (cambioDePantalla) window.scrollTo(0, 0);
 }
 window.addEventListener("hashchange", ir);
+
+// Cronómetro en vivo: cada segundo cambia solo los textos marcados, sin redibujar nada.
+setInterval(() => {
+  const marcas = document.querySelectorAll("[data-cronometro]");
+  if (!marcas.length) return;
+  const c = cronometro(turnoActual(), Date.now());
+  if (!c) return;
+  marcas.forEach((m) => { m.textContent = c.modo === "descanso" && c.ms === 0 ? "Listo" : hms(c.ms); });
+  const medidorTexto = document.querySelector(".tablero svg text");
+  if (medidorTexto && c.modo === "pausa") medidorTexto.textContent = mmss(c.ms);
+}, 1000);
+
+// Al volver a Cabina desde otra app el iPhone había pausado los relojes: se pone al día al instante.
+function alVolver() { if (document.visibilityState !== "visible") return; revisarAvisos(); ir(); }
+document.addEventListener("visibilitychange", alVolver);
+window.addEventListener("pageshow", (e) => { if (e.persisted) alVolver(); });
 
 // El tablero del turno se actualiza cada 30 s sin redibujar la pantalla (antes parpadeaba).
 setInterval(() => {
