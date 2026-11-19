@@ -124,7 +124,7 @@ function vistaHoras(cont) {
         el("p", null, ahora >= libre ? "Ya cumpliste tus 8 h de descanso." : "Puedes volver a arrancar a las " + horaCorta(new Date(libre))),
         el("p", { class: "suave" }, "Manejaste " + duracion(man) + " en este turno."),
         el("div", { class: "botones" }, el("button", { class: "principal", onclick: () => {
-          if (ahora < libre && !confirm("Todavía no cumples 8 h corridas de descanso (te faltan " + duracion(libre - Date.now()) + "). La NOM-087 las pide. ¿Empezar de todos modos?")) return;
+          if (!confirmarSinDescanso()) return;
           guardar("turno", null); empezar(); } }, "Empezar un turno nuevo")));
       return;
     }
@@ -192,6 +192,16 @@ function vistaHoras(cont) {
 // Acciones del turno para el tablero de inicio.
 export { manejado, siguientePausa, enPausa, duracion, faltaPausa, tramo, minutos, cronometro, hms };
 export function turnoActual() { return estadoTurno(); }
+// Cuánto falta para cumplir las 8 h corridas de descanso tras «Terminé de manejar hoy» (0 si ya se cumplieron o no aplica).
+export function faltaDescanso(t, ahora = Date.now()) {
+  if (!t || !t.terminado) return 0;
+  return Math.max(0, t.terminado + 8 * H - ahora);
+}
+// Un solo aviso para todos los botones que arrancan turno: si falta descanso, pide confirmar.
+export function confirmarSinDescanso(ahora = Date.now()) {
+  const falta = faltaDescanso(estadoTurno(), ahora);
+  return falta === 0 || confirm("Todavía no cumples 8 h corridas de descanso (te faltan " + duracion(falta) + "). La NOM-087 las pide. ¿Empezar de todos modos?");
+}
 export function arrancarTurno() {
   if ("Notification" in window && Notification.permission === "default") Notification.requestPermission().catch(() => {});
   guardar("turno", { inicio: Date.now(), pausas: [] }); vigilarTurno();

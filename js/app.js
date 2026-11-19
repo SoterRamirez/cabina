@@ -1,6 +1,6 @@
 // Cabina · la navaja suiza del operador. Sin cuentas, sin servidor: todo vive en tu celular.
 import { el, leer, guardar, todasLasClaves, borrarTodo, encabezado, avisar, compartirArchivo, hoyISO, diaDesdeISO, fechaCorta, horaCorta } from "./ui.js";
-import { HERRAMIENTAS_NORMAS, vigilarTurno, revisarAvisos, turnoActual, arrancarTurno, alternarPausa, manejado, siguientePausa, enPausa, duracion, faltaPausa, cronometro, hms } from "./normas.js";
+import { HERRAMIENTAS_NORMAS, vigilarTurno, revisarAvisos, turnoActual, arrancarTurno, confirmarSinDescanso, alternarPausa, manejado, siguientePausa, enPausa, duracion, faltaPausa, cronometro, hms } from "./normas.js";
 import { HERRAMIENTAS_TRAMITES, vencimientosProximos, enMesDelApto, textoVencimiento } from "./tramites.js";
 import { HERRAMIENTAS_CUENTAS } from "./cuentas.js";
 import { icono } from "./iconos.js";
@@ -71,7 +71,7 @@ function accionesRapidas() {
   const activo = t && !t.terminado;
   const pausa = activo && enPausa(t);
   const turno = !activo
-    ? el("button", { class: "accion senal-verde", onclick: () => { arrancarTurno(); ir(); avisar("Turno iniciado. Te aviso de la pausa."); } }, icono("arrancar", 26), "Empecé a manejar")
+    ? el("button", { class: "accion senal-verde", onclick: () => { if (!confirmarSinDescanso()) return; arrancarTurno(); ir(); avisar("Turno iniciado. Te aviso de la pausa."); } }, icono("arrancar", 26), "Empecé a manejar")
     : el("button", { class: "accion senal-verde", onclick: () => { const aviso = alternarPausa(); ir(); if (aviso) avisar(aviso); } }, icono(pausa ? "arrancar" : "pausa", 26), pausa ? "Terminé mi pausa" : "Empiezo mi pausa");
   return el("div", { class: "acciones" },
     el("a", { class: "accion senal-rojo", href: "#/emergencia" }, icono("telefono", 26), "Emergencia"),

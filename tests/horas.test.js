@@ -13,7 +13,7 @@ globalThis.localStorage = {
   get length() { return memoria.size; }
 };
 
-const { manejado, siguientePausa, enPausa, faltaPausa, tramo, alternarPausa, avisosPendientes, turnoActual, cronometro, hms } = await import("../js/normas.js");
+const { manejado, siguientePausa, enPausa, faltaPausa, tramo, alternarPausa, avisosPendientes, turnoActual, cronometro, hms, faltaDescanso, confirmarSinDescanso } = await import("../js/normas.js");
 const { horaCorta } = await import("../js/ui.js");
 
 const M = 60e3, H = 3600e3;
@@ -211,5 +211,32 @@ describe("Cronómetro en vivo", () => {
     assert.equal(hms(0), "0:00:00");
     assert.equal(hms(3723000), "1:02:03");
     assert.equal(hms(-5), "0:00:00");
+  });
+});
+
+describe("Descanso de 8 h antes de un turno nuevo", () => {
+  const H = 3600e3, AHORA = Date.UTC(2026, 10, 18, 20, 0);
+  test("sin turno o con turno abierto no hay descanso pendiente", () => {
+    assert.equal(faltaDescanso(null, AHORA), 0);
+    assert.equal(faltaDescanso({ inicio: AHORA - H, pausas: [] }, AHORA), 0);
+  });
+  test("a 1 min de terminar faltan 7 h 59 min", () => {
+    assert.equal(faltaDescanso({ inicio: AHORA - 5 * H, pausas: [], terminado: AHORA - 60e3 }, AHORA), 8 * H - 60e3);
+  });
+  test("cumplidas las 8 h ya no falta nada", () => {
+    assert.equal(faltaDescanso({ inicio: AHORA - 20 * H, pausas: [], terminado: AHORA - 8 * H }, AHORA), 0);
+  });
+  // Error visto en iPhone (v22): el botón del inicio arrancaba sin preguntar con 1 min de descanso.
+  test("con descanso incompleto pregunta, y si dice que no, no arranca", () => {
+    localStorage.setItem("cabina:turno", JSON.stringify({ inicio: AHORA - 5 * H, pausas: [], terminado: AHORA - 60e3 }));
+    let preguntas = 0;
+    globalThis.confirm = () => { preguntas++; return false; };
+    assert.equal(confirmarSinDescanso(AHORA), false);
+    assert.equal(preguntas, 1);
+  });
+  test("con descanso cumplido no pregunta", () => {
+    localStorage.setItem("cabina:turno", JSON.stringify({ inicio: AHORA - 20 * H, pausas: [], terminado: AHORA - 9 * H }));
+    globalThis.confirm = () => { throw new Error("no debió preguntar"); };
+    assert.equal(confirmarSinDescanso(AHORA), true);
   });
 });
