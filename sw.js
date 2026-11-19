@@ -1,5 +1,5 @@
 // Cabina funciona sin señal: guarda la app en el celular la primera vez que se abre.
-const VERSION = "cabina-v4";
+const VERSION = "cabina-v5";
 const ARCHIVOS = [
   "./", "index.html", "manifest.webmanifest", "css/cabina.css",
   "js/app.js", "js/ui.js", "js/iconos.js", "js/ayuda.js", "js/normas.js", "js/tramites.js", "js/cuentas.js",
@@ -7,7 +7,8 @@ const ARCHIVOS = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(ARCHIVOS)).then(() => self.skipWaiting()));
+  // cache: "reload" evita tomar copias viejas de la memoria del navegador al instalar una versión nueva.
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(ARCHIVOS.map((u) => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (e) => {

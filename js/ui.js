@@ -49,7 +49,7 @@ const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "o
 export function fechaCorta(d) { return d.getDate() + " " + MESES[d.getMonth()] + " " + d.getFullYear(); }
 export function horaCorta(d) {
   const h = d.getHours(), m = String(d.getMinutes()).padStart(2, "0");
-  return (h % 12 || 12) + ":" + m + (h < 12 ? " a. m." : " p. m.");
+  return (h % 12 || 12) + ":" + m + (h < 12 ? "\u202fa.\u202fm." : "\u202fp.\u202fm.");
 }
 export function diaDesdeISO(iso) { const [a, m, d] = iso.split("-").map(Number); return new Date(a, m - 1, d); }
 export function hoyISO() { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
