@@ -33,8 +33,17 @@ js/tramites.js        emergencias, IAVE, constancia, sedes, mensajes SICT
 js/cuentas.js         diésel, convertidor, gastos, ganancia y bitácora
 js/ui.js              ayudantes compartidos
 datos/                sedes del Mes del Apto Médico (DOF 13/11/2026)
+tests/                pruebas automáticas (node --test)
 sw.js                 modo sin señal
 ```
+
+Pruebas automáticas (Node 20 o más nuevo, sin instalar nada):
+
+```bash
+npm test
+```
+
+Cubren la lógica de **Horas de manejo** (NOM-087): pausas de 30 min que se pueden repartir, tope de 14 h, avisos y formato de la hora. GitHub las corre solas en cada cambio (pestaña *Actions*). Si cambias `js/normas.js`, corre las pruebas antes de publicar.
 
 Para probarla en tu compu:
 

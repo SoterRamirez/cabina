@@ -56,17 +56,25 @@ function notificar(texto) {
     }
   } catch { /* sin notificaciones */ }
 }
+// Decide qué avisos tocan en este momento. Separada del sonido para poder probarla (tests/horas.test.js).
+// «dados» guarda los avisos ya mostrados para no repetirlos.
+export function avisosPendientes(t, ahora, dados = {}) {
+  const mensajes = [];
+  if (!t || t.terminado || enPausa(t)) return { mensajes, dados };
+  const sp = siguientePausa(t), clave = String(sp);
+  if (ahora >= sp - 10 * M && ahora < sp && !dados["pre" + clave]) { dados["pre" + clave] = 1; mensajes.push("En 10 minutos te toca tu pausa de 30 min."); }
+  if (ahora >= sp && !dados["ya" + clave]) { dados["ya" + clave] = 1; dados["pre" + clave] = 1; mensajes.push("Ya llevas 5 h manejando: toca pausa de 30 minutos."); }
+  if (manejado(t, ahora) >= 14 * H && !dados["tope" + t.inicio]) { dados["tope" + t.inicio] = 1; mensajes.push("Llegaste a 14 h de manejo. Ya no puedes seguir hoy."); }
+  return { mensajes, dados };
+}
+
 export function vigilarTurno() {
   clearInterval(alarmaInterval);
   alarmaInterval = setInterval(() => {
-    const t = estadoTurno();
-    if (!t || t.terminado || enPausa(t)) return;
-    const ahora = Date.now(), dados = leer("avisos-turno", {});
-    const sp = siguientePausa(t);
-    const clave = String(sp);
-    if (ahora >= sp - 10 * M && !dados["pre" + clave]) { dados["pre" + clave] = 1; guardar("avisos-turno", dados); notificar("En 10 minutos te toca tu pausa de 30 min."); }
-    if (ahora >= sp && !dados["ya" + clave]) { dados["ya" + clave] = 1; guardar("avisos-turno", dados); notificar("Ya llevas 5 h manejando: toca pausa de 30 minutos."); }
-    if (manejado(t, ahora) >= 14 * H && !dados["tope" + t.inicio]) { dados["tope" + t.inicio] = 1; guardar("avisos-turno", dados); notificar("Llegaste a 14 h de manejo. Ya no puedes seguir hoy."); }
+    const { mensajes, dados } = avisosPendientes(estadoTurno(), Date.now(), leer("avisos-turno", {}));
+    if (!mensajes.length) return;
+    guardar("avisos-turno", dados);
+    mensajes.forEach(notificar);
   }, 15e3);
 }
 
@@ -159,7 +167,7 @@ function vistaHoras(cont) {
 }
 
 // Acciones del turno para el tablero de inicio.
-export { manejado, siguientePausa, enPausa, duracion, faltaPausa };
+export { manejado, siguientePausa, enPausa, duracion, faltaPausa, tramo, minutos };
 export function turnoActual() { return estadoTurno(); }
 export function arrancarTurno() {
   if ("Notification" in window && Notification.permission === "default") Notification.requestPermission().catch(() => {});
