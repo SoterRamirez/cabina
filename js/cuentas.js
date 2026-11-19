@@ -75,7 +75,7 @@ function vistaGastos(cont) {
   const nombre = campo("Viaje", { placeholder: "Texcoco – Monterrey", value: viaje().nombre });
   const anticipo = campo("Anticipo que te dieron", { inputmode: "decimal", placeholder: "8000", value: viaje().anticipo });
   const categoria = campo("Concepto", { tag: "select", opciones: CATEGORIAS.map((c) => [c, c]) });
-  const monto = campo("Monto", { inputmode: "decimal", placeholder: "450" });
+  const monto = campo("Monto", { inputmode: "decimal", placeholder: "450", "data-foco": true });
   const nota = campo("Nota", { placeholder: "Caseta Palmillas", autocomplete: "off" }, "Opcional.");
   const lista = el("ul", { class: "lista" });
   const resumen = el("div", { class: "resultado", "aria-live": "polite" });
@@ -142,7 +142,7 @@ function vistaGanancia(cont) {
 const TIPOS = ["Salida", "Llegada", "Carga", "Descarga", "Parada", "Pausa", "Descanso", "Revisión / retén", "Falla", "Otro"];
 function vistaBitacora(cont) {
   const tipo = campo("¿Qué pasó?", { tag: "select", opciones: TIPOS.map((t) => [t, t]) });
-  const lugar = campo("Lugar", { placeholder: "Caseta San Martín / km 120", autocomplete: "off" });
+  const lugar = campo("Lugar", { placeholder: "Caseta San Martín / km 120", autocomplete: "off", "data-foco": true });
   const km = campo("Odómetro", { inputmode: "numeric", placeholder: "Opcional" });
   const nota = campo("Nota", { tag: "textarea", placeholder: "Opcional" });
   const lista = el("ul", { class: "lista" });

@@ -196,7 +196,7 @@ function ir() {
     activa = (PESTANAS.find((p) => p.grupo === h.grupo) || PESTANAS[0]).ruta;
     const volver = vista.querySelector(".volver"); if (volver) volver.setAttribute("href", "#/" + activa);
     const titulo = vista.querySelector("h1"); if (titulo) titulo.classList.add("senal-borde-" + (h.urgente ? "rojo" : SENAL[h.grupo]));
-    if (extra === "nuevo") setTimeout(() => { const forms = vista.querySelectorAll("form"); const c = (forms[forms.length - 1] || vista).querySelector("input, select"); if (c) c.focus(); }, 50);
+    if (extra === "nuevo") setTimeout(() => { const c = vista.querySelector("[data-foco]") || vista.querySelector("form input"); if (c) c.focus(); }, 50);
   } else if (id === "tramites") { activa = id; document.title = "Trámites · Cabina"; pestanaGrupo("Trámites", "Trámites y normas", "Lo que pide la autoridad, con la fuente oficial."); }
   else if (id === "cuentas") { activa = id; document.title = "Cuentas · Cabina"; pestanaGrupo("Cuentas", "Cuentas y bitácora", "Tus números del viaje, guardados solo en tu celular."); }
   else if (id === "mis-datos") { activa = id; document.title = "Mis datos · Cabina"; misDatos(); }
@@ -220,7 +220,17 @@ function revisarRed() { red.hidden = navigator.onLine; }
 window.addEventListener("online", revisarRed); window.addEventListener("offline", revisarRed);
 window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); instalador = e; if (!location.hash || location.hash === "#/") ir(); });
 
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+if ("serviceWorker" in navigator) {
+  // Si ya había una versión y entra una nueva, recarga una vez para que el operador la vea en esta misma apertura.
+  const habiaVersion = !!navigator.serviceWorker.controller;
+  let recargado = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!habiaVersion || recargado) return;
+    recargado = true;
+    location.reload();
+  });
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
 revisarRed();
 vigilarTurno();
 iniciarMetricas();
