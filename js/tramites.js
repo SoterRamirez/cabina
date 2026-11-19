@@ -5,7 +5,28 @@ const APTO = ["Acuerdo del Mes del Apto Médico, DOF 13/11/2026", "https://dof.g
 const IAVE = ["Lineamientos IAVE, DOF 29/07/2026", "https://dof.gob.mx/nota_detalle.php?codigo=5794972&fecha=29/07/2026"];
 
 // ───────── Mi constancia y mi licencia ─────────
-function diasPara(iso) { const h = new Date(); h.setHours(0, 0, 0, 0); return Math.round((diaDesdeISO(iso) - h) / 864e5); }
+function diasPara(iso, hoy = new Date()) { const h = new Date(hoy); h.setHours(0, 0, 0, 0); return Math.round((diaDesdeISO(iso) - h) / 864e5); }
+
+// Recordatorio del inicio: qué documentos vencen en «limite» días o menos (o ya vencieron), el más urgente primero.
+// Separada de la pantalla para poder probarla (tests/vencimientos.test.js).
+const NOMBRES = { constancia: "Tu constancia de aptitud psicofísica", licencia: "Tu licencia federal" };
+export function vencimientosProximos(datos = {}, hoy = new Date(), limite = 30) {
+  return ["constancia", "licencia"]
+    .filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(datos[k] || ""))
+    .map((k) => ({ clave: k, nombre: NOMBRES[k], iso: datos[k], dias: diasPara(datos[k], hoy) }))
+    .filter((v) => v.dias <= limite)
+    .sort((a, b) => a.dias - b.dias);
+}
+// Mes del Apto Médico 2026 (acuerdo SICT, DOF 13/11/2026): del 17 de noviembre al 17 de diciembre.
+export function enMesDelApto(hoy = new Date()) {
+  const d = new Date(hoy); d.setHours(0, 0, 0, 0);
+  return d >= new Date(2026, 10, 17) && d <= new Date(2026, 11, 17);
+}
+export function textoVencimiento(v) {
+  if (v.dias < 0) return v.nombre + " venció hace " + (-v.dias === 1 ? "1 día" : -v.dias + " días") + ". No debes manejar con ella vencida.";
+  if (v.dias === 0) return v.nombre + " vence hoy.";
+  return v.nombre + " vence en " + (v.dias === 1 ? "1 día" : v.dias + " días") + " (" + fechaCorta(diaDesdeISO(v.iso)) + ").";
+}
 function estadoVence(nombre, iso) {
   if (!iso) return null;
   const d = diasPara(iso), fecha = fechaCorta(diaDesdeISO(iso));

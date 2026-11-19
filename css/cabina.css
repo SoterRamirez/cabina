@@ -184,3 +184,8 @@ h1[class*="senal-borde-"] { padding-left: 12px; border-left: 6px solid; border-r
 input[type="date"], input[type="time"] { -webkit-appearance: none; appearance: none; display: block; min-width: 0; width: 100%; min-height: 48px; }
 input::-webkit-date-and-time-value { text-align: left; }
 .campo-pegar { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Aviso de documentos por vencer en el inicio */
+.aviso-vence { border: 2px solid var(--rojo-claro); }
+.aviso-vence .etiqueta-vence { font: 500 12px var(--mono); letter-spacing: 1.5px; color: var(--rojo-claro); margin: 0 0 6px; }
+.aviso-vence .texto-vence { font-weight: 700; margin: 0 0 6px; }

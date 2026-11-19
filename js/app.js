@@ -1,7 +1,7 @@
 // Cabina · la navaja suiza del operador. Sin cuentas, sin servidor: todo vive en tu celular.
 import { el, leer, guardar, todasLasClaves, borrarTodo, encabezado, avisar, compartirArchivo, hoyISO, diaDesdeISO, fechaCorta, horaCorta } from "./ui.js";
 import { HERRAMIENTAS_NORMAS, vigilarTurno, turnoActual, arrancarTurno, alternarPausa, manejado, siguientePausa, enPausa, duracion, faltaPausa } from "./normas.js";
-import { HERRAMIENTAS_TRAMITES } from "./tramites.js";
+import { HERRAMIENTAS_TRAMITES, vencimientosProximos, enMesDelApto, textoVencimiento } from "./tramites.js";
 import { HERRAMIENTAS_CUENTAS } from "./cuentas.js";
 import { icono } from "./iconos.js";
 import { vistaAyuda, vistaAviso, tarjetaBienvenida } from "./ayuda.js";
@@ -103,6 +103,26 @@ function tiraIeps() {
   return caja;
 }
 
+// Aviso de vencimientos en el inicio: aparece a 30 días o menos y se puede posponer hasta mañana.
+function avisoVencimientos() {
+  const lista = vencimientosProximos(leer("vencimientos", {}));
+  const pospuesto = leer("vencimientos-pospuesto", "");
+  if (!lista.length || (pospuesto && pospuesto > hoyISO())) return "";
+  const caja = el("section", { class: "caja aviso-vence", "aria-label": "Documentos por vencer" },
+    el("p", { class: "etiqueta-vence" }, lista[0].dias < 0 ? "DOCUMENTO VENCIDO" : "POR VENCER"),
+    ...lista.map((v) => el("p", { class: "texto-vence" }, textoVencimiento(v))),
+    lista.some((v) => v.clave === "constancia") && enMesDelApto()
+      ? el("p", { class: "suave" }, "Aprovecha el Mes del Apto Médico: renovación el mismo día, hasta el 17 de diciembre.") : "",
+    el("div", { class: "botones" },
+      el("a", { class: "boton principal", href: "#/" + (lista.some((v) => v.clave === "constancia") && enMesDelApto() ? "sedes" : "constancia") }, lista.some((v) => v.clave === "constancia") && enMesDelApto() ? "Ver sedes" : "Revisar fechas"),
+      el("button", { class: "secundario", onclick: () => {
+        const m = new Date(); m.setDate(m.getDate() + 1);
+        guardar("vencimientos-pospuesto", m.getFullYear() + "-" + String(m.getMonth() + 1).padStart(2, "0") + "-" + String(m.getDate()).padStart(2, "0"));
+        caja.remove();
+      } }, "Recordar mañana")));
+  return caja;
+}
+
 function letrero(h) {
   return el("a", { class: "letrero senal-" + (h.urgente ? "rojo" : SENAL[h.grupo]), href: "#/" + h.id },
     icono(h.icono, 26), el("span", null, h.titulo), icono("flecha", 20, "flecha"));
@@ -117,7 +137,7 @@ function pestanaCamino() {
   if (instalador && !instalada) instalar.hidden = false;
   const bienvenida = leer("bienvenida", null) ? "" : tarjetaBienvenida(() => { guardar("bienvenida", new Date().toISOString()); ir(); });
   vista.append(el("h1", { class: "sr-only" }, "Cabina, en el camino"),
-    bienvenida, tableroTurno(), accionesRapidas(), tiraIeps(),
+    bienvenida, avisoVencimientos(), tableroTurno(), accionesRapidas(), tiraIeps(),
     el("h2", { class: "grupo" }, "En el camino"),
     el("div", { class: "letreros" }, ...HERRAMIENTAS.filter((h) => h.grupo === "Camino" && h.id !== "emergencia").map(letrero)),
     instalar,
