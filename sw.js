@@ -1,9 +1,11 @@
 // Cabina funciona sin señal: guarda la app en el celular la primera vez que se abre.
-const VERSION = "cabina-v15";
+const VERSION = "cabina-v16";
 const ARCHIVOS = [
   "./", "index.html", "manifest.webmanifest", "css/cabina.css",
   "js/app.js", "js/ui.js", "js/iconos.js", "js/ayuda.js", "js/metricas.js", "js/normas.js", "js/tramites.js", "js/cuentas.js",
-  "datos/sedes-apto-medico.json", "img/marca.svg", "img/icono-192.png", "img/icono-512.png"
+  "datos/sedes-apto-medico.json", "img/marca.svg", "img/icono-192.png", "img/icono-512.png",
+  "fuentes/barlow-400.woff2", "fuentes/barlow-600.woff2", "fuentes/barlow-700.woff2",
+  "fuentes/barlow-condensed-700.woff2", "fuentes/ibm-plex-mono-500.woff2"
 ];
 
 self.addEventListener("install", (e) => {

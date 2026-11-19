@@ -34,6 +34,7 @@ js/cuentas.js         diésel, convertidor, gastos, ganancia y bitácora
 js/ui.js              ayudantes compartidos
 datos/                sedes del Mes del Apto Médico (DOF 13/11/2026)
 tests/                pruebas automáticas (node --test)
+fuentes/              Barlow, Barlow Condensed e IBM Plex Mono (SIL OFL 1.1)
 sw.js                 modo sin señal
 ```
 
