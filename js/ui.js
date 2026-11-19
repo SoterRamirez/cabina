@@ -60,6 +60,8 @@ export function campo(etiqueta, attrs = {}, ayuda) {
   const id = attrs.id || "c" + (++contador);
   const tag = attrs.tag || "input";
   delete attrs.tag;
+  // Los ejemplos llevan «Ej.:» para que no parezcan datos ya escritos.
+  if (attrs.placeholder && !/^(Opcional|Pega)/.test(attrs.placeholder)) attrs.placeholder = "Ej.: " + attrs.placeholder;
   const control = el(tag, { ...attrs, id, "aria-describedby": ayuda ? id + "-ayuda" : null });
   if (tag === "select") (attrs.opciones || []).forEach(([v, t]) => control.append(el("option", { value: v }, t)));
   control.removeAttribute("opciones");

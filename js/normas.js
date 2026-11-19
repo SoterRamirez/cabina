@@ -81,7 +81,7 @@ function vistaHoras(cont) {
       const libre = t.terminado + 8 * H;
       tablero.append(el("p", { class: "suave" }, "Descanso de 8 h corridas"),
         el("p", { class: "reloj" }, ahora >= libre ? "Listo" : duracion(libre - ahora)),
-        el("p", null, ahora >= libre ? "Ya cumpliste tus 8 h de descanso." : "Puedes volver a arrancar a las " + horaCorta(new Date(libre)) + "."),
+        el("p", null, ahora >= libre ? "Ya cumpliste tus 8 h de descanso." : "Puedes volver a arrancar a las " + horaCorta(new Date(libre))),
         el("p", { class: "suave" }, "Manejaste " + duracion(man) + " en este turno."),
         el("div", { class: "botones" }, el("button", { class: "principal", onclick: () => { guardar("turno", null); empezar(); } }, "Empezar un turno nuevo")));
       return;
@@ -92,8 +92,8 @@ function vistaHoras(cont) {
       el("p", { class: "suave" }, pausa ? "En pausa desde " + horaCorta(new Date(t.pausas[t.pausas.length - 1].ini)) : "Manejando desde " + horaCorta(new Date(t.inicio))),
       el("p", { class: "reloj" }, duracion(man)),
       el("p", null, "De 14 h de manejo te quedan " + duracion(Math.max(0, 14 * H - man)) + "."),
-      pausa ? el("p", null, "La pausa debe durar al menos 30 min: termina a las " + horaCorta(new Date(t.pausas[t.pausas.length - 1].ini + 30 * M)) + ".")
-        : el("p", { class: ahora >= sp ? "alerta" : "" }, ahora >= sp ? "Ya te toca la pausa de 30 min." : "Pausa de 30 min a más tardar a las " + horaCorta(new Date(sp)) + "."),
+      pausa ? el("p", null, "La pausa debe durar al menos 30 min: termina a las " + horaCorta(new Date(t.pausas[t.pausas.length - 1].ini + 30 * M)))
+        : el("p", { class: ahora >= sp ? "alerta" : "" }, ahora >= sp ? "Ya te toca la pausa de 30 min." : "Pausa de 30 min a más tardar a las " + horaCorta(new Date(sp))),
       el("div", { class: "botones" },
         pausa ? el("button", { class: "principal", onclick: terminarPausa }, "Terminé mi pausa")
           : el("button", { class: "principal", onclick: iniciarPausa }, "Empiezo mi pausa"),
