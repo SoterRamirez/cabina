@@ -222,7 +222,9 @@ function pintarBarra(activa) {
     icono(p.icono, 24), el("span", null, p.titulo))));
 }
 
+let diaPintado = hoyISO();
 function ir() {
+  diaPintado = hoyISO();
   if (limpiar) { try { limpiar(); } catch { /* nada */ } limpiar = null; }
   vista.replaceChildren();
   const [id, extra] = location.hash.replace(/^#\/?/, "").split("?");
@@ -271,18 +273,25 @@ function buscarVersion() {
   ultimaRevisionVersion = Date.now();
   navigator.serviceWorker.getRegistration().then((r) => r && r.update()).catch(() => {});
 }
-function alVolver() { if (document.visibilityState !== "visible") return; revisarAvisos(); ir(); buscarVersion(); }
+// Al volver ya no se redibuja toda la pantalla: se perdía lo abierto (p. ej. «Qué dice la fuente oficial» al regresar del DOF).
+// Solo se redibuja si cambió el día (avisos de vencimiento, revisión diaria); el tablero del inicio se pone al día solo.
+function alVolver() {
+  if (document.visibilityState !== "visible") return;
+  revisarAvisos(); buscarVersion();
+  if (diaPintado !== hoyISO()) ir(); else refrescarTablero();
+}
 document.addEventListener("visibilitychange", alVolver);
 window.addEventListener("pageshow", (e) => { if (e.persisted) alVolver(); });
 
 // El tablero del turno se actualiza cada 30 s sin redibujar la pantalla (antes parpadeaba).
-setInterval(() => {
+function refrescarTablero() {
   if (location.hash && location.hash !== "#/") return;
   const viejo = vista.querySelector(".tablero");
   if (!viejo) return;
   const nuevo = tableroTurno();
   if (nuevo.textContent !== viejo.textContent || nuevo.innerHTML !== viejo.innerHTML) viejo.replaceWith(nuevo);
-}, 30e3);
+}
+setInterval(refrescarTablero, 30e3);
 
 const red = document.getElementById("estado-red");
 function revisarRed() { red.hidden = navigator.onLine; }

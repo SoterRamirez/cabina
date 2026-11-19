@@ -193,7 +193,10 @@ function vistaHoras(cont) {
     fuente("«Todo conductor debe realizar una pausa de 30 minutos cuando: a) Ha conducido hasta cinco horas continuas… b) Esta pausa podrá distribuirse durante un lapso de cinco horas y media» (num. 4.1). «Los periodos de pausa, en ningún caso podrán ser acumulables» (4.2). «El tiempo máximo de conducción en 24 horas nunca podrá exceder las 14 horas» (4.7). En rutas de hasta 14 h de conducción, pausa «no menor a 8 horas continuas» (4.6 a). La bitácora de horas de servicio la da el permisionario y se porta siempre (4.3).", [NOM087]));
   pintar();
   reloj = setInterval(pintar, 30e3);
-  return () => clearInterval(reloj);
+  // Al volver a la app se pone al día solo el tablero; el resto de la pantalla (planeador, fuente) se queda como estaba.
+  const alVolver = () => { if (document.visibilityState === "visible") pintar(); };
+  document.addEventListener("visibilitychange", alVolver);
+  return () => { clearInterval(reloj); document.removeEventListener("visibilitychange", alVolver); };
 }
 
 // Acciones del turno para el tablero de inicio.
@@ -317,7 +320,7 @@ function vistaVelocidades(cont) {
     el("div", { class: "caja" },
       el("p", { class: "cifra" }, "80 km/h de día"), el("p", { class: "cifra" }, "70 km/h de noche"), el("p", null, "Camión y tractocamión en carretera. En tramo urbano, 50 km/h (art. 134)."),
       el("p", { class: "aviso" }, "Desde agosto de 2026 la multa por exceso puede llegar por radar o fotomulta (art. 136 Bis)."),
-      el("p", null, el("strong", null, "Alcohol: 0.0 mg/L en aire espirado "), "para el autotransporte. Negarte a la prueba se sanciona igual (art. 93)."),
+      el("p", null, el("strong", null, "Alcohol: 0.0 mg/L en aire expirado "), "para el autotransporte. Negarte a la prueba se sanciona igual (art. 93)."),
       el("p", null, "Con niebla, granizo, hielo, nieve o lluvia intensa, el full y el tractocamión articulado no deben circular, y nunca en convoy (art. 102).")),
     fuente("Art. 134: «III. Camión y Tractocamión 50 50 Carretera Urbana 80 70 Carretera». Art. 93: prohibido conducir con «alcohol en aire expirado superior a 0.0 miligramos por litro». Reformas DOF 25/05/2026 y 13/08/2026.", [REGLAMENTO]));
 }
