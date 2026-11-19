@@ -178,3 +178,9 @@ h1[class*="senal-borde-"] { padding-left: 12px; border-left: 6px solid; border-r
 
 /* Evita el destello gris al tocar en iPhone */
 * { -webkit-tap-highlight-color: transparent; }
+
+/* iPhone: los campos de fecha y hora no respetaban el ancho de su columna */
+.fila > .campo { min-width: 0; }
+input[type="date"], input[type="time"] { -webkit-appearance: none; appearance: none; display: block; min-width: 0; width: 100%; min-height: 48px; }
+input::-webkit-date-and-time-value { text-align: left; }
+.campo-pegar { display: flex; gap: 10px; flex-wrap: wrap; }

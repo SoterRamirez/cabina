@@ -25,13 +25,14 @@ let ultimaVista = null;
 let instalador = null;
 
 // ───────── Piezas del tablero ─────────
-function medidor(fraccion, texto) {
+function medidor(fraccion, texto, etiqueta = "manejo") {
   const r = 30, c = 2 * Math.PI * r, f = Math.max(0, Math.min(1, fraccion));
   const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   s.setAttribute("viewBox", "0 0 76 76"); s.setAttribute("width", "92"); s.setAttribute("height", "92"); s.setAttribute("aria-hidden", "true");
   s.innerHTML = `<circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--linea)" stroke-width="8"/>` +
     (f <= 0 ? "" : `<circle cx="38" cy="38" r="${r}" fill="none" stroke="${f >= 1 ? "var(--rojo-claro)" : "var(--raya)"}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${(c * f).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 38 38)"/>`) +
-    `<text x="38" y="43" text-anchor="middle" fill="var(--tinta)" style="font:700 17px var(--titulo)">${texto}</text>`;
+    `<text x="38" y="40" text-anchor="middle" fill="var(--tinta)" style="font:700 17px var(--titulo)">${texto}</text>` +
+    `<text x="38" y="53" text-anchor="middle" fill="var(--suave)" style="font:500 9px var(--texto)">${etiqueta}</text>`;
   return s;
 }
 function duracionCorta(ms) { const h = Math.floor(ms / 3600e3), m = Math.floor((ms % 3600e3) / 60e3); return h + ":" + String(m).padStart(2, "0"); }
@@ -46,7 +47,7 @@ function tableroTurno() {
   }
   if (t.terminado) {
     const libre = t.terminado + 8 * 3600e3, listo = ahora >= libre;
-    caja.append(el("div", { class: "tablero-fila" }, medidor(listo ? 1 : (ahora - t.terminado) / (8 * 3600e3), listo ? "OK" : duracionCorta(libre - ahora)),
+    caja.append(el("div", { class: "tablero-fila" }, medidor(listo ? 1 : (ahora - t.terminado) / (8 * 3600e3), listo ? "OK" : duracionCorta(libre - ahora), listo ? "listo" : "faltan"),
       el("div", null, el("p", { class: "etiqueta" }, "DESCANSO"), el("p", { class: "titular" }, listo ? "Ya puedes arrancar" : "Hasta las " + horaCorta(new Date(libre))),
         el("p", { class: "chico" }, "8 h corridas (NOM-087)."))));
     return caja;
@@ -134,8 +135,11 @@ function pestanaGrupo(grupo, titulo, sub) {
 function misDatos() {
   const n = Object.keys(todasLasClaves()).length;
   const estado = el("p", { class: "suave" }, "");
+  const instalada = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
   if (navigator.storage && navigator.storage.persisted) navigator.storage.persisted().then((p) => {
-    estado.textContent = p ? "Almacenamiento protegido: el navegador no borrará tus datos por falta de espacio." : "Almacenamiento normal. Instala Cabina o toca «Proteger mis datos».";
+    estado.textContent = p ? "Almacenamiento protegido: el navegador no borrará tus datos por falta de espacio."
+      : instalada ? "Cabina está instalada en tu pantalla de inicio: así el celular no borra tus datos por falta de uso. Aun así, respalda de vez en cuando."
+      : "Almacenamiento normal. Instala Cabina en tu pantalla de inicio o toca «Proteger mis datos».";
   });
   const archivo = el("input", { type: "file", accept: "application/json,.json", hidden: true, onchange: restaurar });
   async function respaldar() {

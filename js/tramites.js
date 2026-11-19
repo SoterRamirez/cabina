@@ -100,8 +100,20 @@ function vistaSict(cont) {
     out.push(el("p", { class: "suave" }, "Para el Mes del Apto Médico el único registro válido es micrs.sct.gob.mx. La SICT no te va a pedir pagos por WhatsApp."));
     res.replaceChildren(...out);
   }
+  // En el celular pegar con el dedo cuesta: un botón trae lo copiado (el iPhone pide permiso la primera vez).
+  async function pegar() {
+    try {
+      const t = await navigator.clipboard.readText();
+      if (!t) return texto.marcar("No hay nada copiado. Copia el mensaje en WhatsApp y vuelve.");
+      texto.control.value = t; texto.marcar("");
+      revisar(new Event("submit"));
+    } catch { texto.marcar("Tu celular no dejó pegar desde aquí. Deja presionado el recuadro y elige «Pegar»."); }
+  }
   cont.append(...encabezado("¿Es real el mensaje de la SICT?", "Revisa si un aviso de «suspensión de placas» o de multas trae un enlace oficial."),
-    el("form", { class: "caja", novalidate: true, onsubmit: revisar }, texto, el("button", { class: "principal" }, "Revisar mensaje"), res,
+    el("form", { class: "caja", novalidate: true, onsubmit: revisar }, texto,
+      el("div", { class: "botones" },
+        navigator.clipboard && navigator.clipboard.readText ? el("button", { type: "button", class: "principal", onclick: pegar }, "Pegar y revisar") : null,
+        el("button", { class: navigator.clipboard && navigator.clipboard.readText ? "secundario" : "principal" }, "Revisar mensaje")), res,
       el("p", { class: "suave" }, "Lo que pegas se revisa en tu celular; no se manda a ningún lado.")),
     fuente("Los sitios del gobierno federal terminan en .gob.mx. Para la jornada del apto médico, el registro es micrs.sct.gob.mx (verificado el 14/11/2026).", [APTO]));
 }
