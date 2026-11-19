@@ -60,7 +60,13 @@ function notificar(texto) {
 // «dados» guarda los avisos ya mostrados para no repetirlos.
 export function avisosPendientes(t, ahora, dados = {}) {
   const mensajes = [];
-  if (!t || t.terminado || enPausa(t)) return { mensajes, dados };
+  if (!t || t.terminado) return { mensajes, dados };
+  // En pausa: avisa una sola vez cuando se juntan los 30 min (la pausa puede venir repartida).
+  if (enPausa(t)) {
+    const clavePausa = "completa" + t.pausas[t.pausas.length - 1].ini;
+    if (faltaPausa(t, ahora) === 0 && !dados[clavePausa]) { dados[clavePausa] = 1; mensajes.push("Ya completaste tus 30 min de pausa. Cuando quieras, toca «Terminé mi pausa»."); }
+    return { mensajes, dados };
+  }
   const sp = siguientePausa(t), clave = String(sp);
   if (ahora >= sp - 10 * M && ahora < sp && !dados["pre" + clave]) { dados["pre" + clave] = 1; mensajes.push("En 10 minutos te toca tu pausa de 30 min."); }
   if (ahora >= sp && !dados["ya" + clave]) { dados["ya" + clave] = 1; dados["pre" + clave] = 1; mensajes.push("Ya llevas 5 h manejando: toca pausa de 30 minutos."); }
@@ -124,7 +130,7 @@ function vistaHoras(cont) {
         pausa ? el("button", { class: "principal", onclick: terminarPausa }, "Terminé mi pausa")
           : el("button", { class: "principal", onclick: iniciarPausa }, "Empiezo mi pausa"),
         el("button", { class: "secundario", onclick: terminarDia }, "Terminé de manejar hoy")),
-      el("p", { class: "suave" }, "El aviso suena y vibra mientras Cabina esté abierta. Con la app cerrada el celular no garantiza la alarma.")
+      el("p", { class: "suave" }, "Cabina suena y vibra 10 min antes de tu pausa, a las 5 h, al completar 30 min de pausa y al llegar a 14 h, mientras esté abierta. Con la app cerrada el celular no garantiza la alarma.")
     );
   }
   function empezar() {

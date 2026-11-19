@@ -116,8 +116,29 @@ describe("Avisos del turno", () => {
     const { mensajes } = avisosPendientes(turno(pausa(120, 10)), T0 + 5 * H, {});
     assert.ok(mensajes.includes("Ya llevas 5 h manejando: toca pausa de 30 minutos."));
   });
-  test("en pausa no suena nada", () => {
+  test("en pausa no suena el aviso de las 5 h", () => {
     assert.deepEqual(avisosPendientes(turno(pausa(290)), T0 + 5 * H, {}).mensajes, []);
+  });
+  const COMPLETA = "Ya completaste tus 30 min de pausa. Cuando quieras, toca «Terminé mi pausa».";
+  test("avisa al completar 30 min de pausa", () => {
+    assert.deepEqual(avisosPendientes(turno(pausa(290)), T0 + 290 * M + 30 * M, {}).mensajes, [COMPLETA]);
+  });
+  test("no avisa antes de completar los 30 min", () => {
+    assert.deepEqual(avisosPendientes(turno(pausa(290)), T0 + 290 * M + 29 * M, {}).mensajes, []);
+  });
+  test("con pausa repartida avisa al juntar 30 (10 antes + 20 ahora)", () => {
+    const t = turno(pausa(60, 10), pausa(200));
+    assert.deepEqual(avisosPendientes(t, T0 + 200 * M + 19 * M, {}).mensajes, []);
+    assert.deepEqual(avisosPendientes(t, T0 + 200 * M + 20 * M, {}).mensajes, [COMPLETA]);
+  });
+  test("el aviso de pausa completa no se repite", () => {
+    const { dados } = avisosPendientes(turno(pausa(290)), T0 + 321 * M, {});
+    assert.deepEqual(avisosPendientes(turno(pausa(290)), T0 + 330 * M, dados).mensajes, []);
+  });
+  test("una pausa nueva en otro tramo vuelve a avisar", () => {
+    const { dados } = avisosPendientes(turno(pausa(290)), T0 + 321 * M, {});
+    const t2 = turno(pausa(290, 30), pausa(600));
+    assert.deepEqual(avisosPendientes(t2, T0 + 631 * M, dados).mensajes, [COMPLETA]);
   });
   test("tope de 14 h de manejo en 24 h (NOM-087 4.7)", () => {
     const t = turno(pausa(300, 30), pausa(630, 30)); // 14 h de manejo a las 15 h
