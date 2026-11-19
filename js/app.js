@@ -1,6 +1,6 @@
 // Cabina · la navaja suiza del operador. Sin cuentas, sin servidor: todo vive en tu celular.
 import { el, leer, guardar, todasLasClaves, borrarTodo, encabezado, avisar, compartirArchivo, hoyISO, diaDesdeISO, fechaCorta, horaCorta } from "./ui.js";
-import { HERRAMIENTAS_NORMAS, vigilarTurno, turnoActual, arrancarTurno, alternarPausa, manejado, siguientePausa, enPausa, duracion } from "./normas.js";
+import { HERRAMIENTAS_NORMAS, vigilarTurno, turnoActual, arrancarTurno, alternarPausa, manejado, siguientePausa, enPausa, duracion, faltaPausa } from "./normas.js";
 import { HERRAMIENTAS_TRAMITES } from "./tramites.js";
 import { HERRAMIENTAS_CUENTAS } from "./cuentas.js";
 import { icono } from "./iconos.js";
@@ -57,7 +57,7 @@ function tableroTurno() {
   const tramo = pausa ? 0 : (ahora - desde) / (5 * 3600e3);
   caja.append(el("a", { class: "tablero-fila", href: "#/horas" }, medidor(tramo, duracionCorta(man)),
     el("div", null, el("p", { class: "etiqueta" }, pausa ? "EN PAUSA" : "MANEJANDO"),
-      el("p", { class: "titular" + (!pausa && ahora >= sp ? " urgente-texto" : "") }, pausa ? "Mínimo hasta las " + horaCorta(new Date(ult.ini + 30 * 60e3)) : (ahora >= sp ? "¡Toca tu pausa!" : "Pausa a las " + horaCorta(new Date(sp)))),
+      el("p", { class: "titular" + (!pausa && ahora >= sp ? " urgente-texto" : "") }, pausa ? (faltaPausa(t, ahora) > 0 ? "Mínimo hasta las " + horaCorta(new Date(ahora + faltaPausa(t, ahora))) : "Pausa completa") : (ahora >= sp ? "¡Toca tu pausa!" : "Pausa a las " + horaCorta(new Date(sp)))),
       el("p", { class: "chico" }, "Quedan " + duracion(Math.max(0, 14 * 3600e3 - man)) + " de 14 h."))));
   return caja;
 }
@@ -68,7 +68,7 @@ function accionesRapidas() {
   const pausa = activo && enPausa(t);
   const turno = !activo
     ? el("button", { class: "accion senal-verde", onclick: () => { arrancarTurno(); ir(); avisar("Turno iniciado. Te aviso de la pausa."); } }, icono("arrancar", 26), "Empecé a manejar")
-    : el("button", { class: "accion senal-verde", onclick: () => { alternarPausa(); ir(); } }, icono(pausa ? "arrancar" : "pausa", 26), pausa ? "Terminé mi pausa" : "Empiezo mi pausa");
+    : el("button", { class: "accion senal-verde", onclick: () => { const aviso = alternarPausa(); ir(); if (aviso) avisar(aviso); } }, icono(pausa ? "arrancar" : "pausa", 26), pausa ? "Terminé mi pausa" : "Empiezo mi pausa");
   return el("div", { class: "acciones" },
     el("a", { class: "accion senal-rojo", href: "#/emergencia" }, icono("telefono", 26), "Emergencia"),
     turno,

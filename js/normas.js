@@ -17,12 +17,19 @@ function manejado(t, ahora = Date.now()) {
   const pausas = t.pausas.reduce((s, p) => s + ((p.fin || fin) - p.ini), 0);
   return Math.max(0, fin - t.inicio - pausas);
 }
-function siguientePausa(t) {
-  // 5 h de manejo continuo desde el arranque o desde que terminó la última pausa.
-  const ult = t.pausas[t.pausas.length - 1];
-  const desde = ult && ult.fin ? ult.fin : t.inicio;
-  return desde + 5 * H;
+// NOM-087, 4.1: 30 min de pausa a más tardar a las 5 h de manejo; la pausa se puede repartir.
+// Una pausa corta NO reinicia el conteo: el tramo de 5 h empieza de nuevo solo cuando se juntan 30 min de pausa.
+function tramo(t, ahora = Date.now()) {
+  let desde = t.inicio, acumulada = 0;
+  for (const p of t.pausas) {
+    acumulada += (p.fin || ahora) - p.ini;
+    if (p.fin && acumulada >= 30 * M) { desde = p.fin; acumulada = 0; }
+  }
+  return { desde, acumulada };
 }
+function siguientePausa(t) { return tramo(t).desde + 5 * H; }
+function faltaPausa(t, ahora = Date.now()) { return Math.max(0, 30 * M - tramo(t, ahora).acumulada); }
+function minutos(ms) { return Math.ceil(ms / M); }
 function enPausa(t) { const p = t && t.pausas[t.pausas.length - 1]; return !!(p && !p.fin); }
 function duracion(ms) { const h = Math.floor(ms / H), m = Math.floor((ms % H) / M); return h + " h " + String(m).padStart(2, "0") + " min"; }
 
@@ -92,8 +99,12 @@ function vistaHoras(cont) {
       el("p", { class: "suave" }, pausa ? "En pausa desde " + horaCorta(new Date(t.pausas[t.pausas.length - 1].ini)) : "Manejando desde " + horaCorta(new Date(t.inicio))),
       el("p", { class: "reloj" }, duracion(man)),
       el("p", null, "De 14 h de manejo te quedan " + duracion(Math.max(0, 14 * H - man)) + "."),
-      pausa ? el("p", null, "La pausa debe durar al menos 30 min: termina a las " + horaCorta(new Date(t.pausas[t.pausas.length - 1].ini + 30 * M)))
-        : el("p", { class: ahora >= sp ? "alerta" : "" }, ahora >= sp ? "Ya te toca la pausa de 30 min." : "Pausa de 30 min a más tardar a las " + horaCorta(new Date(sp))),
+      pausa ? el("p", null, faltaPausa(t, ahora) > 0
+          ? "Para completar 30 min de pausa te faltan " + minutos(faltaPausa(t, ahora)) + " min: hasta las " + horaCorta(new Date(ahora + faltaPausa(t, ahora)))
+          : "Ya completaste tus 30 min de pausa. Puedes seguir.")
+        : el("p", { class: ahora >= sp ? "alerta" : "" }, ahora >= sp ? "Ya te toca la pausa de 30 min." : (faltaPausa(t, ahora) < 30 * M
+          ? "Llevas " + (30 - minutos(faltaPausa(t, ahora))) + " min de pausa; te faltan " + minutos(faltaPausa(t, ahora)) + " min a más tardar a las " + horaCorta(new Date(sp))
+          : "Pausa de 30 min a más tardar a las " + horaCorta(new Date(sp)))),
       el("div", { class: "botones" },
         pausa ? el("button", { class: "principal", onclick: terminarPausa }, "Terminé mi pausa")
           : el("button", { class: "principal", onclick: iniciarPausa }, "Empiezo mi pausa"),
@@ -106,7 +117,7 @@ function vistaHoras(cont) {
     guardar("turno", { inicio: Date.now(), pausas: [] }); pintar(); vigilarTurno();
   }
   function iniciarPausa() { const t = estadoTurno(); t.pausas.push({ ini: Date.now() }); guardar("turno", t); pintar(); }
-  function terminarPausa() { const t = estadoTurno(); t.pausas[t.pausas.length - 1].fin = Date.now(); guardar("turno", t); pintar(); }
+  function terminarPausa() { const aviso = alternarPausa(); if (aviso) avisar(aviso); pintar(); }
   function terminarDia() {
     if (!confirm("¿Terminaste de manejar por hoy? Empieza a contar tu descanso de 8 h.")) return;
     const t = estadoTurno(); const p = t.pausas[t.pausas.length - 1];
@@ -141,16 +152,23 @@ function vistaHoras(cont) {
 }
 
 // Acciones del turno para el tablero de inicio.
-export { manejado, siguientePausa, enPausa, duracion };
+export { manejado, siguientePausa, enPausa, duracion, faltaPausa };
 export function turnoActual() { return estadoTurno(); }
 export function arrancarTurno() {
   if ("Notification" in window && Notification.permission === "default") Notification.requestPermission().catch(() => {});
   guardar("turno", { inicio: Date.now(), pausas: [] }); vigilarTurno();
 }
+// Devuelve un aviso si la pausa terminó antes de juntar 30 min.
 export function alternarPausa() {
-  const t = estadoTurno(); if (!t || t.terminado) return;
-  if (enPausa(t)) t.pausas[t.pausas.length - 1].fin = Date.now(); else t.pausas.push({ ini: Date.now() });
+  const t = estadoTurno(); if (!t || t.terminado) return null;
+  let aviso = null;
+  if (enPausa(t)) {
+    const falta = faltaPausa(t);
+    t.pausas[t.pausas.length - 1].fin = Date.now();
+    if (falta > 0) aviso = "Tu pausa no completó 30 min: te faltan " + minutos(falta) + " min antes de las " + horaCorta(new Date(siguientePausa(t)));
+  } else t.pausas.push({ ini: Date.now() });
   guardar("turno", t);
+  return aviso;
 }
 
 // ───────── Físico-mecánica por placa ─────────
