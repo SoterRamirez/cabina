@@ -5,6 +5,7 @@ import { HERRAMIENTAS_TRAMITES } from "./tramites.js";
 import { HERRAMIENTAS_CUENTAS } from "./cuentas.js";
 import { icono } from "./iconos.js";
 import { vistaAyuda, vistaAviso, tarjetaBienvenida } from "./ayuda.js";
+import { iniciarMetricas, contarVista } from "./metricas.js";
 
 const HERRAMIENTAS = [...HERRAMIENTAS_TRAMITES, ...HERRAMIENTAS_NORMAS, ...HERRAMIENTAS_CUENTAS];
 // Pestañas de la barra inferior. El color es el del señalamiento: verde camino, azul informativo, amarillo cuentas.
@@ -20,6 +21,7 @@ const POST_SUGERENCIAS = "https://www.facebook.com/groups/bolsadetrabajoparaoper
 const vista = document.getElementById("vista");
 const barra = document.getElementById("barra-inferior");
 let limpiar = null;
+let ultimaVista = null;
 let instalador = null;
 
 // ───────── Piezas del tablero ─────────
@@ -203,6 +205,8 @@ function ir() {
   else if (id === "aviso") { activa = "mis-datos"; document.title = "Aviso de responsabilidad · Cabina"; vistaAviso(vista); vista.querySelector(".volver")?.setAttribute("href", "#/mis-datos"); }
   else { document.title = "Cabina · herramientas para operadores"; pestanaCamino(); }
   pintarBarra(activa);
+  // Solo cuenta cuando cambias de pantalla, no cuando la misma se redibuja.
+  if ((id || "") !== ultimaVista) { ultimaVista = id || ""; contarVista(ultimaVista, document.title); }
   if (id) vista.focus({ preventScroll: true });
   window.scrollTo(0, 0);
 }
@@ -219,4 +223,5 @@ window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); inst
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 revisarRed();
 vigilarTurno();
+iniciarMetricas();
 ir();

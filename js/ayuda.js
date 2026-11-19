@@ -50,7 +50,8 @@ export function vistaAviso(cont) {
       "Cabina es gratuita y se ofrece «tal cual», sin garantía de ningún tipo. El autor no se hace responsable por multas, sanciones, accidentes, pérdidas económicas ni decisiones que se tomen con base en la información o los cálculos de la app.",
       "Los enlaces a sitios de terceros (gobierno, Amazon, redes sociales) se rigen por las condiciones de esos sitios."),
     seccion("Privacidad",
-      "Cabina no recolecta datos personales, no usa cookies de rastreo ni muestra anuncios. Los mensajes que pegas en el detector de la SICT se revisan en tu celular y no se mandan a ningún lado.",
+      "Cabina no recolecta datos personales, no usa cookies ni muestra anuncios. Lo que guardas (turnos, gastos, bitácora, fechas) y los mensajes que pegas en el detector de la SICT nunca salen de tu celular.",
+      "Para saber cuánta gente la usa, contamos visitas de forma anónima con GoatCounter: qué pantalla se abre, de qué página llegaste y si la abriste instalada. No guarda tu nombre, tu número ni tu ubicación exacta, y no usa cookies. Sin señal no se manda nada.",
       "El código es abierto y se puede revisar en github.com/SoterRamirez/cabina."),
     el("p", { class: "suave" }, "Al usar Cabina aceptas este aviso. ¿Dudas? Escríbeme en Facebook: facebook.com/SoterRamirez."));
 }
