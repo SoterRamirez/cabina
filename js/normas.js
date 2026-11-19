@@ -119,8 +119,7 @@ function vistaHoras(cont) {
     const man = manejado(t, ahora);
     if (t.terminado) {
       const libre = t.terminado + 8 * H;
-      tablero.append(el("p", { class: "suave" }, "Descanso de 8 h corridas"),
-        el("p", { class: "rotulo-reloj" }, ahora >= libre ? "Descanso" : "Te falta de descanso"),
+      tablero.append(el("p", { class: "rotulo-reloj" }, ahora >= libre ? "Descanso de 8 h" : "Te falta de descanso (8 h corridas)"),
         el("p", { class: "reloj", "data-cronometro": "largo", "aria-live": "off" }, ahora >= libre ? "Listo" : hms(libre - ahora)),
         el("p", null, ahora >= libre ? "Ya cumpliste tus 8 h de descanso." : "Puedes volver a arrancar a las " + horaCorta(new Date(libre))),
         el("p", { class: "suave" }, "Manejaste " + duracion(man) + " en este turno."),
