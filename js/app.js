@@ -264,7 +264,14 @@ setInterval(() => {
 }, 1000);
 
 // Al volver a Cabina desde otra app el iPhone había pausado los relojes: se pone al día al instante.
-function alVolver() { if (document.visibilityState !== "visible") return; revisarAvisos(); ir(); }
+// Al volver a la app (iOS la reanuda sin recargar) también se busca versión nueva, máximo cada 30 min.
+let ultimaRevisionVersion = Date.now();
+function buscarVersion() {
+  if (!("serviceWorker" in navigator) || Date.now() - ultimaRevisionVersion < 30 * 60 * 1000) return;
+  ultimaRevisionVersion = Date.now();
+  navigator.serviceWorker.getRegistration().then((r) => r && r.update()).catch(() => {});
+}
+function alVolver() { if (document.visibilityState !== "visible") return; revisarAvisos(); ir(); buscarVersion(); }
 document.addEventListener("visibilitychange", alVolver);
 window.addEventListener("pageshow", (e) => { if (e.persisted) alVolver(); });
 
