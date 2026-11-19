@@ -220,3 +220,6 @@ input::-webkit-date-and-time-value { text-align: left; }
 
 /* Al arrastrar el dedo no se selecciona texto ni sale el menú de iOS en listas y botones. */
 .check label, button, .accion, .pestana { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+/* En celular los campos van en una sola columna: con etiquetas de distinto largo, dos columnas quedaban desalineadas. */
+@media (max-width: 480px) { .fila { grid-template-columns: 1fr; } }

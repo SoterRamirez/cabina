@@ -269,7 +269,7 @@ function vistaHumo(cont) {
     if (!/^\d{4}$/.test(t) || a < 1950 || a > new Date().getFullYear() + 1) return e && anio.marcar("Escribe el año con cuatro números, por ejemplo 2015.");
     guardar("anio-modelo", t);
     const nuevo = a >= 1998;
-    res.replaceChildren(el("p", { class: "cifra" }, nuevo ? "1.50 m⁻¹ · 47.5 %" : "2.25 m⁻¹ · 62 %"),
+    res.replaceChildren(el("p", { class: "cifra" }, nuevo ? "1.50 m⁻¹ · 47.53 %" : "2.25 m⁻¹ · 61.99 %"),
       el("p", null, "Tu unidad modelo " + a + " no puede pasar de " + (nuevo ? "1.50 m⁻¹ (47.53 % de opacidad)." : "2.25 m⁻¹ (61.99 % de opacidad).")),
       el("p", { class: "suave" }, "La verificación de humo es cada semestre. El segundo periodo de 2026 vence el 31 de diciembre."));
   }

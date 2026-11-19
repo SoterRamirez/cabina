@@ -72,7 +72,8 @@ export function campo(etiqueta, attrs = {}, ayuda) {
   caja.marcar = (msg) => {
     error.textContent = msg || ""; error.hidden = !msg;
     control.setAttribute("aria-invalid", msg ? "true" : "false");
-    if (msg) control.focus();
+    // En fecha y hora, enfocar abre el calendario del iPhone y tapa el aviso: solo se lleva la vista al campo.
+    if (msg) { if (/^(date|time|datetime-local|month)$/.test(control.type)) control.scrollIntoView({ block: "center", behavior: "smooth" }); else control.focus(); }
   };
   control.addEventListener("input", () => caja.marcar(""));
   return caja;
