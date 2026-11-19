@@ -13,7 +13,7 @@ globalThis.localStorage = {
   get length() { return memoria.size; }
 };
 
-const { manejado, siguientePausa, enPausa, faltaPausa, tramo, alternarPausa, avisosPendientes, turnoActual, cronometro, hms, faltaDescanso, confirmarSinDescanso, borrarTurno } = await import("../js/normas.js");
+const { manejado, siguientePausa, enPausa, faltaPausa, tramo, alternarPausa, avisosPendientes, turnoActual, cronometro, hms, faltaDescanso, confirmarSinDescanso, borrarTurno, textoPausaRepartida } = await import("../js/normas.js");
 const { horaCorta } = await import("../js/ui.js");
 
 const M = 60e3, H = 3600e3;
@@ -257,5 +257,23 @@ describe("Borrar este turno (pruebas o arranque por error)", () => {
     borrarTurno();
     assert.equal(JSON.parse(localStorage.getItem("cabina:gastos")).items.length, 1);
     assert.equal(JSON.parse(localStorage.getItem("cabina:bitacora")).length, 1);
+  });
+});
+
+describe("Texto de pausa repartida", () => {
+  const M = 60e3, H = 60 * M, AHORA = Date.UTC(2026, 10, 18, 20, 0);
+  // Visto en iPhone (v24): tras una pausa de segundos decía «Llevas 0 min de pausa».
+  test("pausa de segundos dice «menos de 1 min»", () => {
+    const t = { inicio: AHORA - H, pausas: [{ ini: AHORA - 30 * M, fin: AHORA - 30 * M + 4000 }] };
+    assert.match(textoPausaRepartida(t, AHORA), /^Llevas menos de 1 min de pausa; te faltan 30 min a más tardar a las /);
+  });
+  test("pausa de 12 min dice 12 y faltan 18", () => {
+    const t = { inicio: AHORA - 2 * H, pausas: [{ ini: AHORA - H, fin: AHORA - H + 12 * M }] };
+    assert.match(textoPausaRepartida(t, AHORA), /^Llevas 12 min de pausa; te faltan 18 min /);
+  });
+  test("llevas + faltan siempre suma 30", () => {
+    const t = { inicio: AHORA - 2 * H, pausas: [{ ini: AHORA - H, fin: AHORA - H + 12 * M + 30e3 }] };
+    const [, a, b] = textoPausaRepartida(t, AHORA).match(/Llevas (\d+) min.*faltan (\d+) min/);
+    assert.equal(Number(a) + Number(b), 30);
   });
 });

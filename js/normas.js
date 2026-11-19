@@ -142,7 +142,7 @@ function vistaHoras(cont) {
           ? "Para completar 30 min de pausa te faltan " + minutos(faltaPausa(t, ahora)) + " min: hasta las " + horaCorta(new Date(ahora + faltaPausa(t, ahora)))
           : "Ya completaste tus 30 min de pausa. Puedes seguir.")
         : el("p", { class: ahora >= sp ? "alerta" : "" }, ahora >= sp ? "Ya te toca la pausa de 30 min." : (faltaPausa(t, ahora) < 30 * M
-          ? "Llevas " + (30 - minutos(faltaPausa(t, ahora))) + " min de pausa; te faltan " + minutos(faltaPausa(t, ahora)) + " min a más tardar a las " + horaCorta(new Date(sp))
+          ? textoPausaRepartida(t, ahora)
           : "Pausa de 30 min a más tardar a las " + horaCorta(new Date(sp)))),
       el("div", { class: "botones" },
         pausa ? el("button", { class: "principal", onclick: terminarPausa }, "Terminé mi pausa")
@@ -199,6 +199,12 @@ function vistaHoras(cont) {
 // Acciones del turno para el tablero de inicio.
 export { manejado, siguientePausa, enPausa, duracion, faltaPausa, tramo, minutos, cronometro, hms };
 export function turnoActual() { return estadoTurno(); }
+// Manejando con una pausa corta ya hecha: cuánto llevas y cuánto falta. Con segundos no se dice «0 min».
+export function textoPausaRepartida(t, ahora = Date.now()) {
+  const falta = faltaPausa(t, ahora), llevas = 30 * M - falta;
+  const hecho = llevas < M ? "menos de 1 min" : Math.floor(llevas / M) + " min";
+  return "Llevas " + hecho + " de pausa; te faltan " + minutos(falta) + " min a más tardar a las " + horaCorta(new Date(siguientePausa(t)));
+}
 // Quita el turno actual sin dejar horas ni descanso (pruebas o turno arrancado por error). No toca otros datos.
 export function borrarTurno() { guardar("turno", null); guardar("avisos-turno", {}); }
 // Cuánto falta para cumplir las 8 h corridas de descanso tras «Terminé de manejar hoy» (0 si ya se cumplieron o no aplica).
