@@ -120,6 +120,7 @@ function vistaHoras(cont) {
     if (t.terminado) {
       const libre = t.terminado + 8 * H;
       tablero.append(el("p", { class: "suave" }, "Descanso de 8 h corridas"),
+        el("p", { class: "rotulo-reloj" }, ahora >= libre ? "Descanso" : "Te falta de descanso"),
         el("p", { class: "reloj", "data-cronometro": "largo", "aria-live": "off" }, ahora >= libre ? "Listo" : hms(libre - ahora)),
         el("p", null, ahora >= libre ? "Ya cumpliste tus 8 h de descanso." : "Puedes volver a arrancar a las " + horaCorta(new Date(libre))),
         el("p", { class: "suave" }, "Manejaste " + duracion(man) + " en este turno."),
@@ -130,8 +131,10 @@ function vistaHoras(cont) {
     }
     const pausa = enPausa(t);
     const sp = siguientePausa(t);
-    tablero.append(
+    // filter(Boolean): append() pinta la palabra «null» si le llega un hueco.
+    tablero.append(...[
       el("p", { class: "suave" }, pausa ? "Pausa en curso desde " + horaCorta(new Date(t.pausas[t.pausas.length - 1].ini)) : "Manejando desde " + horaCorta(new Date(t.inicio))),
+      el("p", { class: "rotulo-reloj" }, pausa ? "Tiempo en pausa" : "Tiempo manejando en este turno"),
       el("p", { class: "reloj", "data-cronometro": "largo", "aria-live": "off" }, hms(cronometro(t, ahora).ms)),
       pausa ? el("p", { class: "suave" }, "Llevas " + duracion(man) + " de manejo en este turno.") : null,
       el("p", null, "De 14 h de manejo te quedan " + duracion(Math.max(0, 14 * H - man)) + "."),
@@ -146,7 +149,7 @@ function vistaHoras(cont) {
           : el("button", { class: "principal", onclick: iniciarPausa }, "Empiezo mi pausa"),
         el("button", { class: "secundario", onclick: terminarDia }, "Terminé de manejar hoy")),
       el("p", { class: "suave" }, "Cabina suena y vibra 10 min antes de tu pausa, a las 5 h, al completar 30 min de pausa y al llegar a 14 h, mientras esté abierta. Con la app cerrada el celular no garantiza la alarma.")
-    );
+    ].filter(Boolean));
   }
   function empezar() {
     if ("Notification" in window && Notification.permission === "default") Notification.requestPermission().catch(() => {});
