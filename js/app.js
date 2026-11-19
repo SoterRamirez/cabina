@@ -15,6 +15,8 @@ const PESTANAS = [
   { ruta: "mis-datos", grupo: null, titulo: "Mis datos", icono: "persona", senal: "gris" }
 ];
 const SENAL = { Camino: "verde", "Trámites": "azul", Cuentas: "amarillo" };
+// Post de Cabina en el grupo de la 57: ahí se juntan las sugerencias.
+const POST_SUGERENCIAS = "https://www.facebook.com/groups/bolsadetrabajoparaoperadores/permalink/2604417443361014/";
 const vista = document.getElementById("vista");
 const barra = document.getElementById("barra-inferior");
 let limpiar = null;
@@ -153,6 +155,7 @@ function misDatos() {
     el("div", { class: "caja" }, el("h2", null, "Borrar todo"), el("p", { class: "suave" }, "Borra turnos, gastos, bitácora y fechas de este celular. No se puede deshacer."),
       el("button", { class: "peligro", onclick: () => { if (confirm("¿Borrar todos tus datos de Cabina en este celular? No se puede deshacer.")) { borrarTodo(); avisar("Datos borrados."); ir(); } } }, "Borrar todos mis datos")),
     el("div", { class: "letreros" },
+      el("a", { class: "letrero senal-amarillo", href: POST_SUGERENCIAS, target: "_blank", rel: "noopener" }, icono("mas", 26), el("span", null, "Sugerir una mejora"), icono("flecha", 20, "flecha")),
       el("a", { class: "letrero senal-azul", href: "#/ayuda" }, icono("documento", 26), el("span", null, "¿Cómo se usa Cabina?"), icono("flecha", 20, "flecha")),
       el("a", { class: "letrero senal-azul", href: "#/aviso" }, icono("escudo", 26), el("span", null, "Aviso de responsabilidad"), icono("flecha", 20, "flecha")),
       el("a", { class: "letrero senal-azul", href: "#/acerca" }, icono("persona", 26), el("span", null, "Acerca de Cabina"), icono("flecha", 20, "flecha"))));
@@ -164,8 +167,8 @@ function acerca() {
       el("p", null, "Cabina es gratis, sin cuentas y sin anuncios. Funciona sin señal después de abrirla una vez."),
       el("p", null, "Todo lo que dice sobre normas sale del DOF o de sitios gob.mx, con la cita a la mano. Es orientativa: ante la duda manda el texto oficial."),
       el("p", null, "El código es abierto: ", el("a", { href: "https://github.com/SoterRamirez/cabina", target: "_blank", rel: "noopener" }, "github.com/SoterRamirez/cabina"), "."),
-      el("p", null, "¿Viste un error o se te ocurre otra herramienta? Escríbeme en ", el("a", { href: "https://facebook.com/SoterRamirez", target: "_blank", rel: "noopener" }, "Facebook"), " o súmate al ",
-        el("a", { href: "https://www.facebook.com/groups/bolsadetrabajoparaoperadores", target: "_blank", rel: "noopener" }, "grupo de la 57"), "."),
+      el("p", null, "¿Viste un error o se te ocurre otra herramienta? Déjalo en los comentarios del post de Cabina en el grupo de la 57. Ahí lo leo y lo contesto."),
+      el("a", { class: "boton principal", href: POST_SUGERENCIAS, target: "_blank", rel: "noopener" }, "Sugerir una mejora"),
       el("p", null, el("a", { href: "../" }, "Volver a soterramirez.dev"))),
     el("div", { class: "caja" },
       el("h2", null, "Apoya a Cabina"),
