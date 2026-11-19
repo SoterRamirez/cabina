@@ -88,7 +88,7 @@ let temporizadorAviso;
 export function avisar(texto) {
   let a = document.getElementById("aviso-flotante");
   if (!a) {
-    a = el("div", { id: "aviso-flotante", role: "status", style: "position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:9;background:#0E1B2E;color:#E8EEF6;border:2px solid #F2B705;border-radius:12px;padding:12px 14px;font-weight:600;max-width:560px;margin:auto" });
+    a = el("div", { id: "aviso-flotante", role: "status", style: "position:fixed;left:16px;right:16px;bottom:calc(90px + env(safe-area-inset-bottom));z-index:9;background:#0E1B2E;color:#E8EEF6;border:2px solid #F2B705;border-radius:12px;padding:12px 14px;font-weight:600;max-width:560px;margin:auto" });
     document.body.append(a);
   }
   a.textContent = texto; a.hidden = false;
@@ -121,7 +121,9 @@ export async function compartirArchivo(nombre, contenido, tipo, titulo) {
 }
 
 export function csv(filas) {
-  return "﻿" + filas.map((f) => f.map((c) => '"' + String(c ?? "").replace(/"/g, '""') + '"').join(",")).join("\r\n");
+  // Un texto que empieza con = + - @ se volvería fórmula al abrirlo en Excel: se le antepone un apóstrofo.
+  const celda = (c) => { let s = String(c ?? ""); if (/^[=+\-@]/.test(s) && !/^-?\d+(\.\d+)?$/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+  return "\uFEFF" + filas.map((f) => f.map(celda).join(",")).join("\r\n");
 }
 
 export function encabezado(titulo, subtitulo) {

@@ -79,17 +79,23 @@ function vistaSict(cont) {
     e.preventDefault();
     const t = texto.control.value.trim();
     if (!t) return texto.marcar("Pega el mensaje para revisarlo.");
-    const urls = t.match(/(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(\/[^\s]*)?/gi) || [];
+    // Se aceptan letras de cualquier alfabeto para detectar imitaciones como «ѕict.gob.mx» con una «ѕ» cirílica.
+    const urls = t.match(/(https?:\/\/)?([\p{L}\p{N}-]+\.)+[\p{L}]{2,}(\/[^\s]*)?/giu) || [];
     const hosts = urls.map((u) => { try { return new URL(/^https?:/i.test(u) ? u : "https://" + u).hostname.toLowerCase(); } catch { return u.toLowerCase(); } });
-    const unicos = [...new Set(hosts)];
+    // Se muestra tal como viene en el mensaje (con la letra falsa), no en su forma técnica «xn--…».
+    const tal = urls.map((u) => u.replace(/^https?:\/\//i, "").split("/")[0].toLowerCase());
+    const imitaciones = [...new Set(tal.filter((h) => /[^\x00-\x7F]/.test(h) || /(^|\.)xn--/.test(h)))];
+    const hostsImitados = new Set(hosts.filter((h, i) => imitaciones.includes(tal[i])));
+    const unicos = [...new Set(hosts)].filter((h) => !hostsImitados.has(h));
     const gob = unicos.filter(esGobierno), conocidos = unicos.filter((h) => !esGobierno(h) && conocido(h));
     const malos = unicos.filter((h) => !esGobierno(h) && !conocido(h));
     const presion = PALABRAS_FRAUDE.filter((p) => t.toLowerCase().includes(p));
     const out = [];
+    if (imitaciones.length) out.push(el("p", { class: "alerta" }, "Ojo: este enlace usa letras de otro alfabeto para parecer oficial: " + imitaciones.join(", ") + ". Es una trampa común: no lo abras."));
     if (malos.length) out.push(el("p", { class: "alerta" }, "Ojo: este enlace NO es de gobierno: " + malos.join(", ") + ". No lo abras ni pagues nada ahí."));
     conocidos.forEach((h) => out.push(el("p", { class: "info" }, h + " es " + conocido(h)[1] + ", no de gobierno. Ahí no se hacen trámites de la SICT ni se pagan multas o placas.")));
     if (gob.length) out.push(el("p", { class: "ok" }, "Los enlaces terminan en .gob.mx: " + gob.join(", ") + ". Aun así, entra escribiendo tú la dirección."));
-    if (!unicos.length) out.push(el("p", null, "No encontré enlaces en el mensaje."));
+    if (!unicos.length && !imitaciones.length) out.push(el("p", null, "No encontré enlaces en el mensaje."));
     if (presion.length) out.push(el("p", { class: "aviso" }, "Usa frases de presión típicas de fraude: «" + presion.join("», «") + "»."));
     out.push(el("p", { class: "suave" }, "Para el Mes del Apto Médico el único registro válido es micrs.sct.gob.mx. La SICT no te va a pedir pagos por WhatsApp."));
     res.replaceChildren(...out);

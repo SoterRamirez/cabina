@@ -75,8 +75,13 @@ function vistaHoras(cont) {
   const plan = el("ol", { class: "linea-tiempo" });
   let reloj;
 
+  let firma = "";
   function pintar() {
     const t = estadoTurno(), ahora = Date.now();
+    // Si nada cambió desde la última vez no se toca la pantalla (evita parpadeo y toques perdidos).
+    const nueva = JSON.stringify(t) + "|" + Math.floor(ahora / M);
+    if (nueva === firma) return;
+    firma = nueva;
     tablero.replaceChildren();
     if (!t) {
       tablero.append(el("p", null, "Toca «Empecé a manejar» cuando arranques. Cabina cuenta tu tiempo y te avisa de la pausa."),
@@ -90,7 +95,9 @@ function vistaHoras(cont) {
         el("p", { class: "reloj" }, ahora >= libre ? "Listo" : duracion(libre - ahora)),
         el("p", null, ahora >= libre ? "Ya cumpliste tus 8 h de descanso." : "Puedes volver a arrancar a las " + horaCorta(new Date(libre))),
         el("p", { class: "suave" }, "Manejaste " + duracion(man) + " en este turno."),
-        el("div", { class: "botones" }, el("button", { class: "principal", onclick: () => { guardar("turno", null); empezar(); } }, "Empezar un turno nuevo")));
+        el("div", { class: "botones" }, el("button", { class: "principal", onclick: () => {
+          if (ahora < libre && !confirm("Todavía no cumples 8 h corridas de descanso (te faltan " + duracion(libre - Date.now()) + "). La NOM-087 las pide. ¿Empezar de todos modos?")) return;
+          guardar("turno", null); empezar(); } }, "Empezar un turno nuevo")));
       return;
     }
     const pausa = enPausa(t);

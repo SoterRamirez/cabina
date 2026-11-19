@@ -53,8 +53,8 @@ function tableroTurno() {
   }
   const man = manejado(t, ahora), pausa = enPausa(t), sp = siguientePausa(t);
   const ult = t.pausas[t.pausas.length - 1];
-  const desde = ult && ult.fin ? ult.fin : t.inicio;
-  const tramo = pausa ? 0 : (ahora - desde) / (5 * 3600e3);
+  // Avance del tramo de 5 h (solo se reinicia al juntar 30 min de pausa).
+  const tramo = pausa ? 0 : 1 - (sp - ahora) / (5 * 3600e3);
   caja.append(el("a", { class: "tablero-fila", href: "#/horas" }, medidor(tramo, duracionCorta(man)),
     el("div", null, el("p", { class: "etiqueta" }, pausa ? "EN PAUSA" : "MANEJANDO"),
       el("p", { class: "titular" + (!pausa && ahora >= sp ? " urgente-texto" : "") }, pausa ? (faltaPausa(t, ahora) > 0 ? "Mínimo hasta las " + horaCorta(new Date(ahora + faltaPausa(t, ahora))) : "Pausa completa") : (ahora >= sp ? "¡Toca tu pausa!" : "Pausa a las " + horaCorta(new Date(sp)))),
@@ -76,18 +76,29 @@ function accionesRapidas() {
     el("a", { class: "accion senal-amarillo", href: "#/bitacora?nuevo" }, icono("mas", 26), "Bitácora"));
 }
 
+// El IEPS se guarda en el celular: se pinta al instante (sin brincos) y se actualiza en silencio con señal.
+let iepsPedido = false;
+function pintarIeps(caja, i) {
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const viejo = diaDesdeISO(i.semana_fin) < hoy;
+  const corta = (iso) => fechaCorta(diaDesdeISO(iso)).replace(/ \d{4}$/, "");
+  caja.replaceChildren(el("span", null, "IEPS diésel · " + (viejo ? "esperando acuerdo nuevo" : corta(i.semana_inicio) + " al " + corta(i.semana_fin))),
+    el("strong", null, i.estimulo_pct + " %"));
+  caja.hidden = false;
+}
 function tiraIeps() {
   const caja = el("a", { class: "tira", hidden: true, href: "../#km1" });
-  // Cuando Cabina vive en soterramirez.dev/herramientas, el IEPS sale de datos/carretera.json del sitio.
-  fetch("../datos/carretera.json", { cache: "no-cache" }).then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => {
-    const i = (d.ieps || [])[0]; if (!i) return;
-    const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
-    const viejo = diaDesdeISO(i.semana_fin) < hoy;
-    const corta = (iso) => fechaCorta(diaDesdeISO(iso)).replace(/ \d{4}$/, "");
-    caja.append(el("span", null, "IEPS diésel · " + (viejo ? "esperando acuerdo nuevo" : corta(i.semana_inicio) + " al " + corta(i.semana_fin))),
-      el("strong", null, i.estimulo_pct + " %"));
-    caja.hidden = false;
-  }).catch(() => {});
+  const guardado = leer("ieps", null);
+  if (guardado) pintarIeps(caja, guardado);
+  if (!iepsPedido) {
+    iepsPedido = true;
+    // Cuando Cabina vive en soterramirez.dev/herramientas, el IEPS sale de datos/carretera.json del sitio.
+    fetch("../datos/carretera.json", { cache: "no-cache" }).then((r) => (r.ok ? r.json() : Promise.reject())).then((d) => {
+      const i = (d.ieps || [])[0]; if (!i) return;
+      guardar("ieps", i);
+      document.querySelectorAll(".tira").forEach((c) => pintarIeps(c, i));
+    }).catch(() => {});
+  }
   return caja;
 }
 
@@ -206,19 +217,31 @@ function ir() {
   else { document.title = "Cabina · herramientas para operadores"; pestanaCamino(); }
   pintarBarra(activa);
   // Solo cuenta cuando cambias de pantalla, no cuando la misma se redibuja.
-  if ((id || "") !== ultimaVista) { ultimaVista = id || ""; contarVista(ultimaVista, document.title); }
+  const cambioDePantalla = (id || "") !== ultimaVista;
+  if (cambioDePantalla) { ultimaVista = id || ""; contarVista(ultimaVista, document.title); }
   if (id) vista.focus({ preventScroll: true });
-  window.scrollTo(0, 0);
+  // Solo sube hasta arriba al cambiar de pantalla, no al redibujar la misma (por ejemplo, al pausar).
+  if (cambioDePantalla) window.scrollTo(0, 0);
 }
 window.addEventListener("hashchange", ir);
 
-// El tablero se refresca solo cada 30 s mientras estás en Camino.
-setInterval(() => { if (!location.hash || location.hash === "#/") ir(); }, 30e3);
+// El tablero del turno se actualiza cada 30 s sin redibujar la pantalla (antes parpadeaba).
+setInterval(() => {
+  if (location.hash && location.hash !== "#/") return;
+  const viejo = vista.querySelector(".tablero");
+  if (!viejo) return;
+  const nuevo = tableroTurno();
+  if (nuevo.textContent !== viejo.textContent || nuevo.innerHTML !== viejo.innerHTML) viejo.replaceWith(nuevo);
+}, 30e3);
 
 const red = document.getElementById("estado-red");
 function revisarRed() { red.hidden = navigator.onLine; }
 window.addEventListener("online", revisarRed); window.addEventListener("offline", revisarRed);
-window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); instalador = e; if (!location.hash || location.hash === "#/") ir(); });
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault(); instalador = e;
+  const caja = vista.querySelector(".instalar");
+  if (caja && !matchMedia("(display-mode: standalone)").matches) caja.hidden = false;
+});
 
 if ("serviceWorker" in navigator) {
   // Si ya había una versión y entra una nueva, recarga una vez para que el operador la vea en esta misma apertura.

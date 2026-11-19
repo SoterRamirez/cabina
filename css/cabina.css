@@ -175,3 +175,6 @@ h1[class*="senal-borde-"] { padding-left: 12px; border-left: 6px solid; border-r
 
 /* Ejemplos de los campos: tenues y en cursiva para no confundirlos con datos */
 ::placeholder { color: var(--suave); opacity: .55; font-style: italic; font-weight: 400; }
+
+/* Evita el destello gris al tocar en iPhone */
+* { -webkit-tap-highlight-color: transparent; }
