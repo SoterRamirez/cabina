@@ -13,7 +13,7 @@ globalThis.localStorage = {
   get length() { return memoria.size; }
 };
 
-const { manejado, siguientePausa, enPausa, faltaPausa, tramo, alternarPausa, avisosPendientes, turnoActual, cronometro, hms, faltaDescanso, confirmarSinDescanso } = await import("../js/normas.js");
+const { manejado, siguientePausa, enPausa, faltaPausa, tramo, alternarPausa, avisosPendientes, turnoActual, cronometro, hms, faltaDescanso, confirmarSinDescanso, borrarTurno } = await import("../js/normas.js");
 const { horaCorta } = await import("../js/ui.js");
 
 const M = 60e3, H = 3600e3;
@@ -238,5 +238,24 @@ describe("Descanso de 8 h antes de un turno nuevo", () => {
     localStorage.setItem("cabina:turno", JSON.stringify({ inicio: AHORA - 20 * H, pausas: [], terminado: AHORA - 9 * H }));
     globalThis.confirm = () => { throw new Error("no debió preguntar"); };
     assert.equal(confirmarSinDescanso(AHORA), true);
+  });
+});
+
+describe("Borrar este turno (pruebas o arranque por error)", () => {
+  const H = 3600e3, AHORA = Date.UTC(2026, 10, 18, 20, 0);
+  test("quita el turno y no deja descanso pendiente", () => {
+    localStorage.setItem("cabina:turno", JSON.stringify({ inicio: AHORA - H, pausas: [], terminado: AHORA - 60e3 }));
+    borrarTurno();
+    assert.equal(turnoActual(), null);
+    globalThis.confirm = () => { throw new Error("no debió preguntar"); };
+    assert.equal(confirmarSinDescanso(AHORA), true);
+  });
+  test("no toca gastos ni bitácora", () => {
+    localStorage.setItem("cabina:gastos", JSON.stringify({ nombre: "Viaje", items: [{ monto: 100 }] }));
+    localStorage.setItem("cabina:bitacora", JSON.stringify([{ tipo: "Nota" }]));
+    localStorage.setItem("cabina:turno", JSON.stringify({ inicio: AHORA - H, pausas: [] }));
+    borrarTurno();
+    assert.equal(JSON.parse(localStorage.getItem("cabina:gastos")).items.length, 1);
+    assert.equal(JSON.parse(localStorage.getItem("cabina:bitacora")).length, 1);
   });
 });

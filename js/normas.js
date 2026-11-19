@@ -125,7 +125,8 @@ function vistaHoras(cont) {
         el("p", { class: "suave" }, "Manejaste " + duracion(man) + " en este turno."),
         el("div", { class: "botones" }, el("button", { class: "principal", onclick: () => {
           if (!confirmarSinDescanso()) return;
-          guardar("turno", null); empezar(); } }, "Empezar un turno nuevo")));
+          guardar("turno", null); empezar(); } }, "Empezar un turno nuevo")),
+        botonBorrar());
       return;
     }
     const pausa = enPausa(t);
@@ -147,7 +148,8 @@ function vistaHoras(cont) {
         pausa ? el("button", { class: "principal", onclick: terminarPausa }, "Terminé mi pausa")
           : el("button", { class: "principal", onclick: iniciarPausa }, "Empiezo mi pausa"),
         el("button", { class: "secundario", onclick: terminarDia }, "Terminé de manejar hoy")),
-      el("p", { class: "suave" }, "Cabina suena y vibra 10 min antes de tu pausa, a las 5 h, al completar 30 min de pausa y al llegar a 14 h, mientras esté abierta. Con la app cerrada el celular no garantiza la alarma.")
+      el("p", { class: "suave" }, "Cabina suena y vibra 10 min antes de tu pausa, a las 5 h, al completar 30 min de pausa y al llegar a 14 h, mientras esté abierta. Con la app cerrada el celular no garantiza la alarma."),
+      botonBorrar()
     ].filter(Boolean));
   }
   function empezar() {
@@ -156,6 +158,11 @@ function vistaHoras(cont) {
   }
   function iniciarPausa() { const t = estadoTurno(); t.pausas.push({ ini: Date.now() }); guardar("turno", t); pintar(); }
   function terminarPausa() { const aviso = alternarPausa(); if (aviso) avisar(aviso); pintar(); }
+  const botonBorrar = () => el("div", { class: "botones borrar-turno" }, el("button", { class: "peligro", onclick: borrarEste }, "Borrar este turno"));
+  function borrarEste() {
+    if (!confirm("¿Borrar este turno? Se quita sin guardar horas ni descanso. Úsalo si lo arrancaste por error o estás probando la app. Tus gastos, bitácora y fechas no se tocan.")) return;
+    borrarTurno(); pintar(); avisar("Turno borrado.");
+  }
   function terminarDia() {
     if (!confirm("¿Terminaste de manejar por hoy? Empieza a contar tu descanso de 8 h.")) return;
     const t = estadoTurno(); const p = t.pausas[t.pausas.length - 1];
@@ -192,6 +199,8 @@ function vistaHoras(cont) {
 // Acciones del turno para el tablero de inicio.
 export { manejado, siguientePausa, enPausa, duracion, faltaPausa, tramo, minutos, cronometro, hms };
 export function turnoActual() { return estadoTurno(); }
+// Quita el turno actual sin dejar horas ni descanso (pruebas o turno arrancado por error). No toca otros datos.
+export function borrarTurno() { guardar("turno", null); guardar("avisos-turno", {}); }
 // Cuánto falta para cumplir las 8 h corridas de descanso tras «Terminé de manejar hoy» (0 si ya se cumplieron o no aplica).
 export function faltaDescanso(t, ahora = Date.now()) {
   if (!t || !t.terminado) return 0;

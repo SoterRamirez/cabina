@@ -214,3 +214,6 @@ input::-webkit-date-and-time-value { text-align: left; }
 /* Rótulo arriba del reloj grande de Horas: dice qué tiempo está corriendo. */
 .rotulo-reloj { margin: 14px 0 4px; font: 500 13px var(--mono); letter-spacing: 1px; text-transform: uppercase; color: var(--suave); }
 .rotulo-reloj + .reloj { margin-top: 0; }
+
+/* «Borrar este turno» va al final y separado, para no tocarlo por error. */
+.borrar-turno { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--linea); }
